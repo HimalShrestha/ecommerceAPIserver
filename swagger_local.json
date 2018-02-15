@@ -1,0 +1,2358 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Ecommerce Api server for admin and web",
+    "version": "1.0.0",
+    "title": "Ecommerce"
+  },
+  "host": "localhost:8888",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Authentication for admin and user"
+    },
+    {
+      "name": "admin member",
+      "description": "Member management for admins"
+    },
+    {
+      "name": "admin user",
+      "description": "user management for admins"
+    },
+    {
+      "name": "user",
+      "description": "Operations about user"
+    },
+    {
+      "name": "orders",
+      "description": "Orders"
+    },
+    {
+      "name": "payment",
+      "description": "Maintain payment methods"
+    },
+    {
+      "name": "product",
+      "description": "Maintain products"
+    },
+    {
+      "name": "seller",
+      "description": "Maintain sellers"
+    },
+    {
+      "name": "carousel",
+      "description": "Maintain carousel"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/admin/auth/login/admin": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login to admin system",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Admin username and password",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Auth"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login/user": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Member login check",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "member username and password",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Auth"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/admin/auth/checkLogin": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Admin login check",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/checkLogin": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Member login",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/admin/auth/logout": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Admin logout",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Member logout",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/admin/member/register": {
+      "post": {
+        "tags": [
+          "admin member"
+        ],
+        "summary": "admin",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "member register",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegisterAdmin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/admin/member/admin": {
+      "get": {
+        "tags": [
+          "admin member"
+        ],
+        "summary": "Get all admins",
+        "description": "",
+        "operationId": "placeOrder",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/admin/member/admin/{adminId}": {
+      "get": {
+        "tags": [
+          "admin member"
+        ],
+        "summary": "Find admin by id",
+        "description": "Returns a single admin",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "adminId",
+            "in": "path",
+            "description": "ID of admin to return",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "422": {
+            "description": "Invalid ID supplied"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "admin member"
+        ],
+        "summary": "update admin by id",
+        "description": "",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "adminId",
+            "in": "path",
+            "description": "ID of admin to return",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "member update",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegisterAdmin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "422": {
+            "description": "Invalid ID supplied"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "admin member"
+        ],
+        "summary": "Deletes an admin",
+        "description": "",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "adminId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Pet not found"
+          }
+        }
+      }
+    },
+    "/admin/member/user": {
+      "get": {
+        "tags": [
+          "admin user"
+        ],
+        "summary": "admin",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/admin/member/user/{userId}": {
+      "get": {
+        "tags": [
+          "admin user"
+        ],
+        "summary": "admin",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "ID of admin to return",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "admin user"
+        ],
+        "summary": "update user by id",
+        "description": "",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "ID of user to update",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "member update",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "422": {
+            "description": "Invalid ID supplied"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "admin user"
+        ],
+        "summary": "Deletes an admin",
+        "description": "",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Pet not found"
+          }
+        }
+      }
+    },
+    "/api/v1/member": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "active user data",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/v1/member/register": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "register user",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "member register",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegisterUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/api/v1/verify": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Member verify",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/v1/member/update/{userId}": {
+      "put": {
+        "tags": [
+          "user"
+        ],
+        "summary": "update user",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "ID of user to update",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "member update",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/order": {
+      "get": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "order",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "post an order",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "order update",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateOrder"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/order/{orderId}": {
+      "get": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "order",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "ID of order to update",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "update order",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "ID of order to update",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "order update",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateOrder"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/order/detail": {
+      "get": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "order details",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/v1/order": {
+      "post": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "post an order",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "order update",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateOrder"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/api/v1/order/transaction": {
+      "get": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "get order transaction",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/payment": {
+      "get": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "get all methods",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "post an order",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "add payment type",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Payment"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/payment/{paymentId}": {
+      "put": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "get all methods",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "paymentId",
+            "in": "path",
+            "description": "ID of method to update",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "add payment type",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Payment"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "delete method",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "paymentId",
+            "in": "path",
+            "description": "ID of method to update",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/product": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "get all products",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "product"
+        ],
+        "summary": "post a product",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "multipart/form-date"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "name",
+            "description": "product name",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "cartDescription",
+            "description": "cart",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "longDescription",
+            "description": "long Desc",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "shortDescription",
+            "description": "short desc",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "location",
+            "description": "product name",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "stock",
+            "description": "product name",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "price",
+            "description": "price",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "visible",
+            "description": "visibility",
+            "required": false
+          },
+          {
+            "in": "formData",
+            "name": "categoryID",
+            "description": "category id",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "sellerID",
+            "description": "seller id",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "thumbnail",
+            "type": "file",
+            "description": "thumbnail image",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "productImage",
+            "type": "file",
+            "description": "main image",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/product/{productId}": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "get this product",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "ID of product",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "product"
+        ],
+        "summary": "update product info",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "ID of method to update",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "formData",
+            "name": "name",
+            "description": "product name",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "cartDescription",
+            "description": "cart",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "longDescription",
+            "description": "long Desc",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "shortDescription",
+            "description": "short desc",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "location",
+            "description": "product name",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "stock",
+            "description": "product name",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "price",
+            "description": "price",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "visible",
+            "description": "visibility",
+            "required": false
+          },
+          {
+            "in": "formData",
+            "name": "categoryID",
+            "description": "category id",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "sellerID",
+            "description": "seller id",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "thumbnail",
+            "type": "file",
+            "description": "thumbnail image",
+            "required": false
+          },
+          {
+            "in": "formData",
+            "name": "productImage",
+            "type": "file",
+            "description": "main image",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "product"
+        ],
+        "summary": "delete product",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "ID of product to delete",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/product/image/{imageId}": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "get thsimage",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "imageId",
+            "in": "path",
+            "description": "image id",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/product/thumbnail/{imageId}": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "get thsimage",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "imageId",
+            "in": "path",
+            "description": "image id",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/api/v1/product/image/{imageId}": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "get thsimage",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "imageId",
+            "in": "path",
+            "description": "image id",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/api/v1/product/thumbnail/{imageId}": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "get thsimage",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "imageId",
+            "in": "path",
+            "description": "image id",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/product/category": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "get all category",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "product"
+        ],
+        "summary": "post category",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "add category",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Category"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/product/category/{categoryId}": {
+      "put": {
+        "tags": [
+          "product"
+        ],
+        "summary": "update category",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "path",
+            "description": "ID of category to update",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "add category",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Category"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "product"
+        ],
+        "summary": "delete product category",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "path",
+            "description": "ID of product to delete",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/api/v1/product": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "get all products",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/api/v1/product/{productId}": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "get products",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "ID of product",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/seller": {
+      "get": {
+        "tags": [
+          "seller"
+        ],
+        "summary": "get seller",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "seller"
+        ],
+        "summary": "post seller",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "add seller",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Seller"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/seller/{sellerId}": {
+      "put": {
+        "tags": [
+          "seller"
+        ],
+        "summary": "update seller",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "sellerId",
+            "in": "path",
+            "description": "ID of seller to update",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "update seller",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Seller"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "seller"
+        ],
+        "summary": "delete seller",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "sellerId",
+            "in": "path",
+            "description": "ID of seller to delete",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/api/v1/seller": {
+      "get": {
+        "tags": [
+          "seller"
+        ],
+        "summary": "get seller",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "seller"
+        ],
+        "summary": "post seller",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "add seller",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Seller"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/api/v1/seller/{sellerId}": {
+      "put": {
+        "tags": [
+          "seller"
+        ],
+        "summary": "update seller",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "sellerId",
+            "in": "path",
+            "description": "ID of seller to update",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "update seller",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Seller"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/carousel": {
+      "get": {
+        "tags": [
+          "carousel"
+        ],
+        "summary": "get carousel",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "carousel"
+        ],
+        "summary": "post carousel",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "image",
+            "type": "file",
+            "required": true,
+            "description": "The file to upload."
+          },
+          {
+            "in": "formData",
+            "name": "imageDesc",
+            "description": "image ko description",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "status",
+            "description": "1 ki 0",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/carousel/{carouselId}": {
+      "get": {
+        "tags": [
+          "carousel"
+        ],
+        "summary": "get this carousel",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "carouselId",
+            "in": "path",
+            "description": "ID of carousel",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "carousel"
+        ],
+        "summary": "update carousel info",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "image",
+            "type": "file",
+            "required": false,
+            "description": "The file to upload."
+          },
+          {
+            "in": "formData",
+            "name": "imageDesc",
+            "description": "image ko description",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "status",
+            "description": "1 ki 0",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "carousel"
+        ],
+        "summary": "delete carousel",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "carouselId",
+            "in": "path",
+            "description": "ID of carousel to delete",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/api/v1/carousel": {
+      "get": {
+        "tags": [
+          "carousel"
+        ],
+        "summary": "get all carousel",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/api/v1/carousel/image/{carouselId}": {
+      "get": {
+        "tags": [
+          "carousel"
+        ],
+        "summary": "get this carousel",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "carouselId",
+            "in": "path",
+            "description": "ID of carousel",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Seller": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "jeetwin"
+        },
+        "sellerDescription": {
+          "type": "string",
+          "example": "Game Points dfkjkdufb dakjbdhfkasf asfjuhaskfasbf afjkjafhg"
+        },
+        "accountName": {
+          "type": "string",
+          "example": "ram chanfra"
+        },
+        "accountNumber": {
+          "type": "string",
+          "example": "874259635826"
+        }
+      }
+    },
+    "Category": {
+      "type": "object",
+      "properties": {
+        "categoryName": {
+          "type": "string",
+          "example": "Game Points"
+        }
+      }
+    },
+    "Payment": {
+      "type": "object",
+      "properties": {
+        "paymentType": {
+          "type": "string",
+          "example": "credit"
+        }
+      }
+    },
+    "Product": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "himal"
+        },
+        "cartDescription": {
+          "type": "string",
+          "example": "shrestha"
+        },
+        "shortDescription": {
+          "type": "string",
+          "example": "circle"
+        },
+        "longDescription": {
+          "type": "string",
+          "example": "circle"
+        },
+        "thumbnailURL": {
+          "type": "string",
+          "example": "somwhere wlse"
+        },
+        "imageURL": {
+          "type": "string",
+          "example": "8945"
+        },
+        "location": {
+          "type": "string",
+          "example": "1223234234"
+        },
+        "stock": {
+          "type": "integer",
+          "format": "int64",
+          "example": "1",
+          "description": "0 or 1"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int64",
+          "example": "1"
+        },
+        "visible": {
+          "type": "integer",
+          "format": "int64",
+          "example": "1",
+          "description": "0 or 1"
+        },
+        "categoryID": {
+          "type": "integer",
+          "format": "int64",
+          "example": "1"
+        },
+        "sellerID": {
+          "type": "integer",
+          "format": "int64",
+          "example": "1"
+        }
+      },
+      "xml": {
+        "name": "UpdateOrder"
+      }
+    },
+    "UpdateOrder": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "string",
+          "example": "himal"
+        },
+        "shipAddress": {
+          "type": "string",
+          "example": "shrestha"
+        },
+        "shipAddress2": {
+          "type": "string",
+          "example": "circle"
+        },
+        "city": {
+          "type": "string",
+          "example": "circle"
+        },
+        "state": {
+          "type": "string",
+          "example": "somwhere wlse"
+        },
+        "zip": {
+          "type": "string",
+          "example": "8945"
+        },
+        "phone": {
+          "type": "string",
+          "example": "1223234234"
+        },
+        "country": {
+          "type": "string",
+          "example": "nepal"
+        },
+        "tax": {
+          "type": "string",
+          "example": "far"
+        },
+        "email": {
+          "type": "string",
+          "example": "somewhere"
+        },
+        "paymentId": {
+          "type": "integer",
+          "format": "int64",
+          "example": "1",
+          "description": "0 or 1"
+        },
+        "productId": {
+          "type": "integer",
+          "format": "int64",
+          "example": "1",
+          "description": "0 or 1"
+        }
+      },
+      "xml": {
+        "name": "UpdateOrder"
+      }
+    },
+    "UpdateUser": {
+      "type": "object",
+      "properties": {
+        "fname": {
+          "type": "string",
+          "example": "himal"
+        },
+        "lname": {
+          "type": "string",
+          "example": "shrestha"
+        },
+        "city": {
+          "type": "string",
+          "example": "circle"
+        },
+        "state": {
+          "type": "string",
+          "example": "somwhere wlse"
+        },
+        "zip": {
+          "type": "string",
+          "example": "8945"
+        },
+        "phone": {
+          "type": "string",
+          "example": "1223234234"
+        },
+        "country": {
+          "type": "string",
+          "example": "nepal"
+        },
+        "address": {
+          "type": "string",
+          "example": "far"
+        },
+        "address2": {
+          "type": "string",
+          "example": "somewhere"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "example": "1",
+          "description": "0 or 1"
+        },
+        "role": {
+          "type": "integer",
+          "format": "int64",
+          "example": "1",
+          "description": "0 or 1"
+        },
+        "password": {
+          "type": "string",
+          "example": "himal"
+        }
+      },
+      "xml": {
+        "name": "UpdateUser"
+      }
+    },
+    "RegisterAdmin": {
+      "type": "object",
+      "required": [
+        "username",
+        "password"
+      ],
+      "properties": {
+        "username": {
+          "type": "string",
+          "example": "himalhs1@gmail.com"
+        },
+        "password": {
+          "type": "string",
+          "example": "himal123"
+        },
+        "email": {
+          "type": "string",
+          "example": "himal123"
+        },
+        "roles": {
+          "type": "string",
+          "example": "himal123"
+        },
+        "fname": {
+          "type": "string",
+          "example": "himal123"
+        },
+        "lname": {
+          "type": "string",
+          "example": "himal"
+        }
+      },
+      "xml": {
+        "name": "RegisterAdmin"
+      }
+    },
+    "RegisterUser": {
+      "type": "object",
+      "required": [
+        "username",
+        "password"
+      ],
+      "properties": {
+        "username": {
+          "type": "string",
+          "example": "himalhs1@gmail.com"
+        },
+        "password": {
+          "type": "string",
+          "example": "himal123"
+        },
+        "fname": {
+          "type": "string",
+          "example": "himal123"
+        },
+        "lname": {
+          "type": "string",
+          "example": "himal"
+        }
+      },
+      "xml": {
+        "name": "RegisterUser"
+      }
+    },
+    "Auth": {
+      "type": "object",
+      "required": [
+        "username",
+        "password"
+      ],
+      "properties": {
+        "username": {
+          "type": "string",
+          "example": "himal"
+        },
+        "password": {
+          "type": "string",
+          "example": "himal"
+        }
+      },
+      "xml": {
+        "name": "Pet"
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
+  }
+}
