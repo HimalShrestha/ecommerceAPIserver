@@ -609,6 +609,38 @@
         }
       }
     },
+    "/api/v1/member/resetPassword": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Member Password reset",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
     "/admin/order": {
       "get": {
         "tags": [
@@ -1923,6 +1955,14 @@
         ],
         "parameters": [
           {
+            "name": "carouselId",
+            "in": "path",
+            "description": "ID of carousel",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
             "in": "formData",
             "name": "image",
             "type": "file",
@@ -1969,6 +2009,40 @@
             "name": "carouselId",
             "in": "path",
             "description": "ID of carousel to delete",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/carousel/image/{carouselId}": {
+      "get": {
+        "tags": [
+          "carousel"
+        ],
+        "summary": "get this carousel",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "carouselId",
+            "in": "path",
+            "description": "ID of carousel",
             "required": true,
             "type": "integer",
             "format": "int64"

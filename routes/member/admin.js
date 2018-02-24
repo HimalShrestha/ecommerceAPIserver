@@ -26,12 +26,8 @@ const { matchedData, sanitize } = require('express-validator/filter')
 // })
 function findUsername(user){
   return new Promise(function(resolve,reject){
-    db.getConn().then(function(conn){
-      conn.query('SELECT AdminUsername AS username FROM admins WHERE AdminUsername=?',[user]).then(function(result){
-        resolve(result[0])
-      }).catch(function(err){
-        reject(err)
-      })
+    db.pool.query('SELECT AdminUsername AS username FROM admins WHERE AdminUsername=?',[user]).then(function(result){
+      resolve(result[0])
     }).catch(function(err){
       reject(err)
     })
@@ -77,11 +73,9 @@ router.post('/register', [
   //   //validate the data from post
   hash.encrypt(user.password).then(function(password){
     let registerData = [user.email,user.username,user.roles,password,user.fname,user.lname]
-    db.getConn().then(function(conn){
-      conn.query('INSERT INTO admins (AdminEmail,AdminUsername,AdminRoles,AdminPassword,AdminFirstName,AdminLastName) VALUES (?,?,?,?,?,?)',registerData).then(function(result){
-        // console.log(result[0]);
-        res.status(200).json({message:'admin.added',code:'Success'})
-      })
+    db.pool.query('INSERT INTO admins (AdminEmail,AdminUsername,AdminRoles,AdminPassword,AdminFirstName,AdminLastName) VALUES (?,?,?,?,?,?)',registerData).then(function(result){
+      // console.log(result[0]);
+      res.status(200).json({message:'admin.added',code:'Success'})
     }).catch(function(err){
       console.log(err);
       res.send(err);
@@ -93,13 +87,8 @@ router.post('/register', [
 });
 
 router.get('/admin', function(req,res){
-  db.getConn().then(function(conn){
-    conn.query(`SELECT AdminID,AdminEmail, AdminUsername,AdminRoles,AdminFirstName,AdminLastName,AdminRegistrationDate FROM admins`).then(function(result){
-        res.status(200).send(result[0])
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
+  db.pool.query(`SELECT AdminID,AdminEmail, AdminUsername,AdminRoles,AdminFirstName,AdminLastName,AdminRegistrationDate FROM admins`).then(function(result){
+    res.status(200).send(result[0])
   }).catch(function(err){
     console.log(err)
     res.send(err)
@@ -107,19 +96,13 @@ router.get('/admin', function(req,res){
 })
 
 router.get('/admin/:id', function(req,res){
-  db.getConn().then(function(conn){
-    conn.query(`SELECT AdminID, AdminEmail, AdminUsername,AdminRoles,AdminFirstName,AdminLastName,AdminRegistrationDate FROM admins WHERE AdminID=?`,[req.params.id]).then(function(result){
-      if(result[0].length>0){
-        res.status(200).send(result[0][0])
-      }
-      else{
-        res.status(422).json({message:'user.no.exist',code:'Failed'})
-      }
-
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
+  db.pool.query(`SELECT AdminID, AdminEmail, AdminUsername,AdminRoles,AdminFirstName,AdminLastName,AdminRegistrationDate FROM admins WHERE AdminID=?`,[req.params.id]).then(function(result){
+    if(result[0].length>0){
+      res.status(200).send(result[0][0])
+    }
+    else{
+      res.status(422).json({message:'user.no.exist',code:'Failed'})
+    }
   }).catch(function(err){
     console.log(err)
     res.send(err)
@@ -146,16 +129,14 @@ router.put('/admin/:id',[
   const admin = matchedData(req);
   if(!admin.password){
     let adminData = [admin.email,admin.roles,admin.fname,admin.lname,id]
-    db.getConn().then(function(conn){
-      conn.query('UPDATE admins SET AdminEmail=?,AdminRoles=?,AdminFirstName=?,AdminLastName=? WHERE AdminID=?',adminData).then(function(result){
-        // console.log(result[0]);
-        if(result[0].affectedRows===0){
-          res.status(422).json({message:'admin.no.exist',code:'Failed'})
-        }
-        else{
-          res.status(200).json({message:'admin.updated',code:'Success'})
-        }
-      })
+    db.pool.query('UPDATE admins SET AdminEmail=?,AdminRoles=?,AdminFirstName=?,AdminLastName=? WHERE AdminID=?',adminData).then(function(result){
+      // console.log(result[0]);
+      if(result[0].affectedRows===0){
+        res.status(422).json({message:'admin.no.exist',code:'Failed'})
+      }
+      else{
+        res.status(200).json({message:'admin.updated',code:'Success'})
+      }
     }).catch(function(err){
       console.log(err);
       res.send(err);
@@ -164,8 +145,7 @@ router.put('/admin/:id',[
   else{
     hash.encrypt(admin.password).then(function(password){
       let adminData = [admin.email,admin.roles,password,admin.fname,admin.lname,id]
-      db.getConn().then(function(conn){
-        conn.query('UPDATE admins SET AdminEmail=?,AdminRoles=?,AdminPassword=?,AdminFirstName=?,AdminLastName=? WHERE AdminID=?',adminData).then(function(result){
+      db.pool.query('UPDATE admins SET AdminEmail=?,AdminRoles=?,AdminPassword=?,AdminFirstName=?,AdminLastName=? WHERE AdminID=?',adminData).then(function(result){
           // console.log(result[0]);
           if(result[0].affectedRows===0){
             res.status(422).json({message:'admin.no.exist',code:'Failed'})
@@ -173,11 +153,10 @@ router.put('/admin/:id',[
           else{
             res.status(200).json({message:'admin.updated',code:'Success'})
           }
+        }).catch(function(err){
+          console.log(err);
+          res.send(err);
         })
-      }).catch(function(err){
-        console.log(err);
-        res.send(err);
-      })
     }).catch(function(err){
       console.log(err);
       res.send(err);
@@ -189,18 +168,13 @@ router.put('/admin/:id',[
 //delete the product
 router.delete('/admin/:id',function(req,res){
   let id = req.params.id
-  db.getConn().then(function(conn){
-    conn.query('DELETE FROM admins WHERE AdminID = ?',[id]).then(function(result){
-      if(result[0].affectedRows===0){
-        res.status(422).json({message:'admin.no.exist',code:'Failed'})
-      }
-      else{
-        res.status(200).json({message:'admin.deleted',code:'Success'})
-      }
-
-    }).catch(function(err){
-      res.send(err)
-    })
+  db.pool.query('DELETE FROM admins WHERE AdminID = ?',[id]).then(function(result){
+    if(result[0].affectedRows===0){
+      res.status(422).json({message:'admin.no.exist',code:'Failed'})
+    }
+    else{
+      res.status(200).json({message:'admin.deleted',code:'Success'})
+    }
   }).catch(function(err){
     res.send(err)
   })
@@ -209,15 +183,10 @@ router.delete('/admin/:id',function(req,res){
 //=============USERS=============
 
 router.get('/user',function(req,res){
-  db.getConn().then(function(conn){
-    conn.query(`SELECT UserID,UserEmail,UserFirstName,UserLastName,UserEmailVerified,UserIP,UserPhone,UserCountry,
+  db.pool.query(`SELECT UserID,UserEmail,UserFirstName,UserLastName,UserEmailVerified,UserIP,UserPhone,UserCountry,
       UserRole,UserStatus,UserSellerID FROM users`).then(function(result){
-        console.log(result)
-        res.status(200).send(result[0])
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
+      console.log(result)
+      res.status(200).send(result[0])
   }).catch(function(err){
     console.log(err)
     res.send(err)
@@ -225,20 +194,14 @@ router.get('/user',function(req,res){
 })
 
 router.get('/user/:id', function(req,res){
-  db.getConn().then(function(conn){
-    conn.query(`SELECT UserID,UserEmail,UserFirstName,UserLastName,UserCity,UserState,UserZip,UserEmailVerified,UserIP,UserPhone,UserCountry,
+  db.pool.query(`SELECT UserID,UserEmail,UserFirstName,UserLastName,UserCity,UserState,UserZip,UserEmailVerified,UserIP,UserPhone,UserCountry,
       UserAddress,UserAddress2,UserStatus,UserRole,UserSellerID FROM users WHERE UserID=?`,[req.params.id]).then(function(result){
-        if(result[0].length>0){
-          res.status(200).send(result[0][0])
-        }
-        else{
-          res.status(422).json({message:'user.no.exist',code:'Failed'})
-        }
-
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
+    if(result[0].length>0){
+      res.status(200).send(result[0][0])
+    }
+    else{
+      res.status(422).json({message:'user.no.exist',code:'Failed'})
+    }
   }).catch(function(err){
     console.log(err)
     res.send(err)
@@ -268,19 +231,15 @@ router.put('/user/:id',[
   const user = matchedData(req);
   if(!user.password){
     let userData = [user.fname,user.lname,user.city,user.state,user.zip,user.phone,user.country,user.address,user.address2,user.status,user.role,id]
-    db.getConn().then(function(conn){
-      conn.query(`UPDATE users SET UserFirstName=?,UserLastName=?,UserCity=?,UserState=?,UserZip=?,UserPhone=?,UserCountry=?,
+    db.pool.query(`UPDATE users SET UserFirstName=?,UserLastName=?,UserCity=?,UserState=?,UserZip=?,UserPhone=?,UserCountry=?,
       UserAddress=?,UserAddress2=?,UserStatus=?,UserRole=? WHERE UserID=?`,userData).then(function(result){
-        // console.log(result[0]);
-        if(result[0].affectedRows===0){
-          return res.status(422).json({message:'user.no.exist',code:'Failed'})
-        }
-        else{
-          return res.status(200).json({message:'user.updated',code:'Success'})
-        }
-      }).catch(function(err){
-        console.log(err)
-      })
+      // console.log(result[0]);
+      if(result[0].affectedRows===0){
+        return res.status(422).json({message:'user.no.exist',code:'Failed'})
+      }
+      else{
+        return res.status(200).json({message:'user.updated',code:'Success'})
+      }
     }).catch(function(err){
       console.log(err);
       return res.send(err);
@@ -288,8 +247,7 @@ router.put('/user/:id',[
   }else{
     hash.encrypt(user.password).then(function(password){
       let userData = [password,user.fname,user.lname,user.city,user.state,user.zip,user.phone,user.country,user.address,user.address2,user.status,user.role,id]
-      db.getConn().then(function(conn){
-        conn.query(`UPDATE users SET UserPassword=?,UserFirstName=?,UserLastName=?,UserCity=?,UserState=?,UserZip=?,UserPhone=?,UserCountry=?,
+      db.pool.query(`UPDATE users SET UserPassword=?,UserFirstName=?,UserLastName=?,UserCity=?,UserState=?,UserZip=?,UserPhone=?,UserCountry=?,
         UserAddress=?,UserAddress2=?,UserStatus=?,UserRole=? WHERE UserID=?`,userData).then(function(result){
           // console.log(result[0]);
           if(result[0].affectedRows===0){
@@ -298,11 +256,10 @@ router.put('/user/:id',[
           else{
             res.status(200).json({message:'user.updated',code:'Success'})
           }
+        }).catch(function(err){
+          console.log(err);
+          res.send(err);
         })
-      }).catch(function(err){
-        console.log(err);
-        res.send(err);
-      })
     }).catch(function(err){
       console.log(err);
       res.send(err);
@@ -314,18 +271,13 @@ router.put('/user/:id',[
 //delete the product
 router.delete('/user/:id',function(req,res){
   let id = req.params.id
-  db.getConn().then(function(conn){
-    conn.query('DELETE FROM users WHERE UserID = ?',[id]).then(function(result){
-      if(result[0].affectedRows===0){
-        res.status(422).json({message:'user.no.exist',code:'Failed'})
-      }
-      else{
-        res.status(200).json({message:'user.deleted',code:'Success'})
-      }
-
-    }).catch(function(err){
-      res.send(err)
-    })
+  db.pool.query('DELETE FROM users WHERE UserID = ?',[id]).then(function(result){
+    if(result[0].affectedRows===0){
+      res.status(422).json({message:'user.no.exist',code:'Failed'})
+    }
+    else{
+      res.status(200).json({message:'user.deleted',code:'Success'})
+    }
   }).catch(function(err){
     res.send(err)
   })

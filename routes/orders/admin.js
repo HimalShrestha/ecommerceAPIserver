@@ -40,16 +40,11 @@ var validate = [
 ]
 
 router.get('/', function(req,res){
-  db.getConn().then(function(conn){
-    conn.query(`SELECT orders.OrderID,orders.OrderUsername,orders.OrderShipAddress,orders.OrderShipAddress2,orders.OrderCity,orders.OrderState,
+  db.pool.query(`SELECT orders.OrderID,orders.OrderUsername,orders.OrderShipAddress,orders.OrderShipAddress2,orders.OrderCity,orders.OrderState,
       orders.OrderZip,orders.OrderCountry,orders.OrderPhone,orders.OrderTax,orders.OrderEmail,paymentmethods.PaymentType,admins.AdminUsername
       FROM orders INNER JOIN paymentmethods ON orders.OrderPaymentID = paymentmethods.PaymentID LEFT JOIN admins ON orders.OrderAdminID = admins.AdminID`).then(function(result){
-        console.log(result)
-        res.status(200).send(result[0])
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
+    console.log(result)
+    res.status(200).send(result[0])
   }).catch(function(err){
     console.log(err)
     res.send(err)
@@ -57,15 +52,10 @@ router.get('/', function(req,res){
 })
 
 router.get('/detail', function(req,res){
-  db.getConn().then(function(conn){
-    conn.query(`SELECT orderdetails.DetailID,products.ProductName,products.ProductPrice,orders.OrderAmount,orders.OrderDate,(orders.OrderAmount*products.productPrice) AS TotalPrice
+  db.pool.query(`SELECT orderdetails.DetailID,products.ProductName,products.ProductPrice,orders.OrderAmount,orders.OrderDate,(orders.OrderAmount*products.productPrice) AS TotalPrice
       FROM orderdetails INNER JOIN products ON products.ProductID = orderdetails.DetailProductID INNER JOIN orders ON orders.OrderID = orderdetails.DetailOrderID`).then(function(result){
-        console.log(result[0])
-        res.status(200).send(result[0])
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
+    console.log(result[0])
+    res.status(200).send(result[0])
   }).catch(function(err){
     console.log(err)
     res.send(err)
@@ -73,20 +63,14 @@ router.get('/detail', function(req,res){
 })
 
 router.get('/:id', function(req,res){
-  db.getConn().then(function(conn){
-    conn.query(`SELECT orders.OrderID,orders.OrderUsername,orders.OrderShipAddress,orders.OrderShipAddress2,orders.OrderCity,orders.OrderState,
+  db.pool.query(`SELECT orders.OrderID,orders.OrderUsername,orders.OrderShipAddress,orders.OrderShipAddress2,orders.OrderCity,orders.OrderState,
       orders.OrderZip,orders.OrderCountry,orders.OrderPhone,orders.OrderTax,orders.OrderEmail,paymentmethods.PaymentType,admins.AdminUsername
       FROM orders INNER JOIN paymentmethods ON orders.OrderPaymentID = paymentmethods.PaymentID LEFT JOIN admins ON orders.OrderAdminID = admins.AdminID WHERE orders.OrderID=?`,[req.params.id]).then(function(result){
-        if(result[0].length > 0){
-          res.status(200).send(result[0][0])
-        }else{
-          res.status(404).json({message:'id.no.exist',code:'Failed'})
-        }
-
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
+    if(result[0].length > 0){
+      res.status(200).send(result[0][0])
+    }else{
+      res.status(404).json({message:'id.no.exist',code:'Failed'})
+    }
   }).catch(function(err){
     console.log(err)
     res.send(err)
@@ -111,12 +95,11 @@ router.post('/', validate, (req, res, next) => {
   //   //validate the data from post
   let user = req.user
   let orderData = [order.amount,user.username,order.shipAddress,order.shipAddress2,order.city,order.state,order.zip,order.country,order.phone,order.tax,order.email,0,user.id,order.paymentId]
-  db.getConn().then(function(conn){
-    conn.query(`INSERT INTO orders (OrderAmount,OrderUsername,OrderShipAddress,OrderShipAddress2,OrderCity,OrderState,
+  db.pool.query(`INSERT INTO orders (OrderAmount,OrderUsername,OrderShipAddress,OrderShipAddress2,OrderCity,OrderState,
       OrderZip,OrderCountry,OrderPhone,OrderTax,OrderEmail,OrderStatus,OrderUserID,OrderPaymentID)
       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,orderData).then(function(result){
         var detailData = [result[0].insertId,order.productId]
-        conn.query(`INSERT INTO orderdetails (DetailOrderID,DetailProductID)
+        db.pool.query(`INSERT INTO orderdetails (DetailOrderID,DetailProductID)
           VALUES (?,?)`,detailData).then(function(result){
           res.status(200).json({message:'order.added',code:'Success'})
         }).catch(function(err){
@@ -127,11 +110,7 @@ router.post('/', validate, (req, res, next) => {
       console.log(err);
       res.send(err);
     })
-  }).catch(function(err){
-    console.log(err);
-    res.send(err);
-  })
-});
+})
 
 router.put('/:id', validate, (req, res, next) => {
   var id = req.params.id
@@ -147,21 +126,16 @@ router.put('/:id', validate, (req, res, next) => {
   //   //validate the data from post
   let admin = req.user.id
   let orderData = [order.amount,order.shipAddress,order.shipAddress2,order.city,order.state,order.zip,order.country,order.phone,order.tax,order.email,order.status,order.paymentId,admin,id]
-  db.getConn().then(function(conn){
-    conn.query(`UPDATE orders SET OrderAmount=?,OrderShipAddress=?,OrderShipAddress2=?,OrderCity=?,OrderState=?,
+  db.pool.query(`UPDATE orders SET OrderAmount=?,OrderShipAddress=?,OrderShipAddress2=?,OrderCity=?,OrderState=?,
       OrderZip=?,OrderCountry=?,OrderPhone=?,OrderTax=?,OrderEmail=?,OrderStatus=?,OrderPaymentID=?,OrderAdminID=? WHERE OrderID=?`,orderData)
-      .then(function(result){
-      console.log(result[0]);
-      if(result[0].affectedRows===0){
-        res.status(422).json({message:'order.no.exist',code:'Failed'})
-      }
-      else{
-        res.status(200).json({message:'order.updated',code:'Success'})
-      }
-    }).catch(function(err){
-      console.log(err);
-      res.send(err);
-    })
+    .then(function(result){
+    console.log(result[0]);
+    if(result[0].affectedRows===0){
+      res.status(422).json({message:'order.no.exist',code:'Failed'})
+    }
+    else{
+      res.status(200).json({message:'order.updated',code:'Success'})
+    }
   }).catch(function(err){
     console.log(err);
     res.send(err);
@@ -193,12 +167,8 @@ router.put('/:id', validate, (req, res, next) => {
 
 function findPaymentID(id){
   return new Promise(function(resolve,reject){
-    db.getConn().then(function(conn){
-      conn.query('SELECT PaymentID FROM paymentmethods WHERE PaymentID=?',[id]).then(function(result){
-        resolve(result[0])
-      }).catch(function(err){
-        reject(err)
-      })
+    db.pool.query('SELECT PaymentID FROM paymentmethods WHERE PaymentID=?',[id]).then(function(result){
+      resolve(result[0])
     }).catch(function(err){
       reject(err)
     })
@@ -206,12 +176,8 @@ function findPaymentID(id){
 }
 function findProductID(id){
   return new Promise(function(resolve,reject){
-    db.getConn().then(function(conn){
-      conn.query('SELECT ProductID FROM products WHERE ProductID=?',[id]).then(function(result){
-        resolve(result[0])
-      }).catch(function(err){
-        reject(err)
-      })
+    db.pool.query('SELECT ProductID FROM products WHERE ProductID=?',[id]).then(function(result){
+      resolve(result[0])
     }).catch(function(err){
       reject(err)
     })

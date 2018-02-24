@@ -21,13 +21,8 @@ var validate = [
 ]
 //get the seller
 router.get('/', function(req,res){
-  db.getConn().then(function(conn){
-    conn.query(`SELECT * FROM sellers`).then(function(result){
-        res.status(200).send(result[0])
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
+  db.pool.query(`SELECT * FROM sellers`).then(function(result){
+    res.status(200).send(result[0])
   }).catch(function(err){
     console.log(err)
     res.send(err)
@@ -49,15 +44,10 @@ router.post('/', validate, (req, res, next) => {
   console.log(seller)
   //   //validate the data from post
   let sellerData = [seller.name,seller.sellerDescription,seller.accountName,seller.accountNumber]
-  db.getConn().then(function(conn){
-    conn.query(`INSERT INTO sellers (SellerName,SellerDesc,SellerAccountName,SellerAccountNumber)
+  db.pool.query(`INSERT INTO sellers (SellerName,SellerDesc,SellerAccountName,SellerAccountNumber)
      VALUES (?,?,?,?)`,sellerData).then(function(result){
-      console.log(result[0]);
-      res.status(200).json({message:'seller.added',code:'Success'})
-    }).catch(function(err){
-      console.log(err);
-      res.send(err);
-    })
+    console.log(result[0]);
+    res.status(200).json({message:'seller.added',code:'Success'})
   }).catch(function(err){
     console.log(err);
     res.send(err);
@@ -76,19 +66,14 @@ router.put('/:id',validate,(req, res, next) => {
   // matchedData returns only the subset of data validated by the middleware
   const seller = matchedData(req);
   let sellerData = [seller.name,seller.sellerDescription,seller.accountName,seller.accountNumber,id]
-  db.getConn().then(function(conn){
-    conn.query(`UPDATE sellers SET SellerName=?,SellerDesc=?,SellerAccountName=?,SellerAccountNumber=? WHERE SellerID = ?`,sellerData).then(function(result){
-        console.log(result[0])
-      if(result[0].affectedRows===0){
-        res.status(422).json({message:'product.no.exist',code:'Failed'})
-      }
-      else{
-        res.status(200).json({message:'product.updated',code:'Success'})
-      }
-
-    }).catch(function(err){
-      res.send(err)
-    })
+  db.pool.query(`UPDATE sellers SET SellerName=?,SellerDesc=?,SellerAccountName=?,SellerAccountNumber=? WHERE SellerID = ?`,sellerData).then(function(result){
+    console.log(result[0])
+    if(result[0].affectedRows===0){
+      res.status(422).json({message:'product.no.exist',code:'Failed'})
+    }
+    else{
+      res.status(200).json({message:'product.updated',code:'Success'})
+    }
   }).catch(function(err){
     res.send(err)
   })
@@ -97,12 +82,8 @@ router.put('/:id',validate,(req, res, next) => {
 
 function findSellerName(name){
   return new Promise(function(resolve,reject){
-    db.getConn().then(function(conn){
-      conn.query('SELECT SellerName AS name FROM sellers WHERE SellerName=?',[name]).then(function(result){
-        resolve(result[0])
-      }).catch(function(err){
-        reject(err)
-      })
+    db.pool.query('SELECT SellerName AS name FROM sellers WHERE SellerName=?',[name]).then(function(result){
+      resolve(result[0])
     }).catch(function(err){
       reject(err)
     })

@@ -39,12 +39,8 @@ let smtpTransport = nodemailer.createTransport({
 // })
 function findUsername(user){
   return new Promise(function(resolve,reject){
-    db.getConn().then(function(conn){
-      conn.query('SELECT UserEmail AS username FROM users WHERE UserEmail=?',[user]).then(function(result){
-        resolve(result[0])
-      }).catch(function(err){
-        reject(err)
-      })
+    db.pool.query('SELECT UserEmail AS username FROM users WHERE UserEmail=?',[user]).then(function(result){
+      resolve(result[0])
     }).catch(function(err){
       reject(err)
     })
@@ -94,26 +90,24 @@ router.post('/register', [
     let emailVerificationCode = uuidv4()
     let userIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     let registerData = [user.username,password,user.fname,user.lname,userIP,0,1,0,emailVerificationCode]
-    db.getConn().then(function(conn){
-      conn.query('INSERT INTO users (UserEmail,UserPassword,UserFirstName,UserLastName,UserIP,UserRole,UserStatus,UserEmailVerified,UserVerificationCode) VALUES (?,?,?,?,?,?,?,?,?)',registerData).then(function(result){
+    db.pool.query('INSERT INTO users (UserEmail,UserPassword,UserFirstName,UserLastName,UserIP,UserRole,UserStatus,UserEmailVerified,UserVerificationCode) VALUES (?,?,?,?,?,?,?,?,?)',registerData).then(function(result){
         //email UserVerificationCode
         host=req.get('host');
         link=req.protocol+"://"+req.get('host')+"/"+redirectPath+"?id="+emailVerificationCode;
         console.log(link)
         mailOptions={
-            to : user.username,
-            subject : "Please confirm your Email account",
-            html : "Hello,<br> Please Click on the link to verify your email.<br><a href="+link+">Click here to verify</a>"
+          to : user.username,
+          subject : "Please confirm your Email account",
+          html : "Hello,<br> Please Click on the link to verify your email.<br><a href="+link+">Click here to verify</a>"
         }
         smtpTransport.sendMail(mailOptions, function(error, response){
          if(error){
-                console.log(error);
+            console.log(error);
             res.status(200).json({message:'user.added.email.not.sent',code:'Success'})
          }else{
             res.status(200).json({message:'user.added.email.sent',code:'Success'})
              }
-        });
-      })
+        })
     }).catch(function(err){
       console.log(err);
       res.send(err);
@@ -122,7 +116,7 @@ router.post('/register', [
     console.log(err);
     res.send(err);
   })
-});
+})
 
 
 //update user information
@@ -159,17 +153,15 @@ router.put('/update/:id', [
   //   //validate the data from post
   if(!user.password){
     let updateData = [user.fname,user.lname,user.city,user.state,user.zip,user.phone,user.country,user.address,user.address2,userIP,id]
-    db.getConn().then(function(conn){
-      conn.query(`UPDATE users SET UserFirstName=?,UserLastName=?,UserCity=?,UserState=?,UserZip=?,UserPhone=?,
+    db.pool.query(`UPDATE users SET UserFirstName=?,UserLastName=?,UserCity=?,UserState=?,UserZip=?,UserPhone=?,
         UserCountry=?,UserAddress=?,UserAddress2=?,UserIP=? WHERE UserID=?`,updateData).then(function(result){
-        console.log(result[0])
-        if(result[0].affectedRows===0){
-          res.status(422).json({message:'user.no.exist',code:'Failed'})
-        }
-        else{
-          res.status(200).json({message:'user.updated',code:'Success'})
-        }
-      })
+      console.log(result[0])
+      if(result[0].affectedRows===0){
+        res.status(422).json({message:'user.no.exist',code:'Failed'})
+      }
+      else{
+        res.status(200).json({message:'user.updated',code:'Success'})
+      }
     }).catch(function(err){
       console.log(err);
       res.send(err);
@@ -178,16 +170,14 @@ router.put('/update/:id', [
   else{
     hash.encrypt(user.password).then(function(password){
       let updateData = [password,user.fname,user.lname,user.city,user.state,user.zip,user.phone,user.country,user.address,user.address2,userIP,id]
-      db.getConn().then(function(conn){
-        conn.query('UPDATE users SET UserPassword=?,UserFirstName=?,UserLastName=?,UserCity=?,UserState=?,UserZip=?,UserPhone=?,UserCountry=?,UserAddress=?,UserAddress2=?,UserIP=? WHERE UserID=?',updateData).then(function(result){
-          console.log(result[0])
-          if(result[0].affectedRows===0){
-            res.status(422).json({message:'user.no.exist',code:'Failed'})
-          }
-          else{
-            res.status(200).json({message:'user.updated',code:'Success'})
-          }
-        })
+      db.pool.query('UPDATE users SET UserPassword=?,UserFirstName=?,UserLastName=?,UserCity=?,UserState=?,UserZip=?,UserPhone=?,UserCountry=?,UserAddress=?,UserAddress2=?,UserIP=? WHERE UserID=?',updateData).then(function(result){
+        console.log(result[0])
+        if(result[0].affectedRows===0){
+          res.status(422).json({message:'user.no.exist',code:'Failed'})
+        }
+        else{
+          res.status(200).json({message:'user.updated',code:'Success'})
+        }
       }).catch(function(err){
         console.log(err);
         res.send(err);
@@ -197,27 +187,68 @@ router.put('/update/:id', [
       res.send(err);
     })
   }
-
-});
+})
 
 router.get('/',function(req,res){
   if(!req.user){
     return res.status(401).json({code:'Unauthorized'})
   }
-  db.getConn().then(function(conn){
-    conn.query(`SELECT UserID,UserEmail,UserFirstName,UserLastName,UserCity,UserState,UserZip,UserPhone,UserCountry,UserAddress,UserAddress2,
+  db.pool.query(`SELECT UserID,UserEmail,UserFirstName,UserLastName,UserCity,UserState,UserZip,UserPhone,UserCountry,UserAddress,UserAddress2,
       UserRole,UserSellerID FROM users WHERE UserID=?`,[req.user.id]).then(function(result){
-        console.log(result)
-        res.status(200).send(result[0][0])
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
+    console.log(result)
+    res.status(200).send(result[0][0])
   }).catch(function(err){
     console.log(err)
     res.send(err)
   })
 })
 
+router.get('/resetPassword',function(req,res){
+  var email = req.query.email
+  var password = randomString(10, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+  var link = req.protocol+"://"+req.get('host')
+  db.pool.query(`SELECT UserEmail FROM users WHERE UserEmail=?`,[email]).then(function(result){
+    if(result[0].length>0){
+      console.log(result[0][0])
+      mailOptions={
+        to : email,
+        subject : "Password reset",
+        html : "Hello,<br> Your password was reset <br>New Password: "+password+"<br><br>Kindly change your password after login<br><a href="+link+">Click here to Login</a>"
+      }
+      smtpTransport.sendMail(mailOptions, function(error, response){
+      if(error){
+        console.log(error);
+        res.status(200).json({message:'email.not.sent',code:'Failed'})
+      }else{
+        hash.encrypt(password).then(function(newPassword){
+          db.pool.query('UPDATE users SET UserPassword=? WHERE UserEmail=?',[newPassword,email]).then(function(result){
+            console.log(result[0])
+            res.status(200).json({message:'email.sent',code:'Success'})
+          }).catch(function(err){
+            console.log(err);
+            res.send(err);
+          })
+        }).catch(function(err){
+          console.log(err);
+          res.send(err);
+        })
+      }
+      })
+    }else{
+      res.status(404).json({message:'email.not.exist',code:'Failed'})
+    }
+  }).catch(function(err){
+    console.log(err)
+    res.send(err)
+  })
+})
+
+function randomString(length, chars) {
+    var result = ''
+    for (var i = length; i > 0; --i) {
+      result += chars[Math.round(Math.random() * (chars.length - 1))]
+    }
+    return result
+}
 
 module.exports = router

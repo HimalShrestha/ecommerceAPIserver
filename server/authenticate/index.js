@@ -23,20 +23,18 @@ module.exports.init = function(apiPassport,adminPassport){
   });
   apiPassport.use('local',new LocalStrategy(
     function(username, password, done) {
-      db.getConn().then(function(conn){
-        conn.query('SELECT UserEmail, UserPassword, UserID, UserEmailVerified FROM users WHERE UserEmail="'+username+'"').then(function(result){
-          if (result[0].length===0) {
-            return done(null, false, { message: 'Incorrect username.' })
+      db.pool.query('SELECT UserEmail, UserPassword, UserID, UserEmailVerified FROM users WHERE UserEmail="'+username+'"').then(function(result){
+        if (result[0].length===0) {
+          return done(null, false, { message: 'Incorrect username.' })
+        }
+        hash.checkHash(result[0][0].UserPassword,password).then(function(res){
+          if(!res){
+            return done(null, false, { message: 'Incorrect password.' })
           }
-          hash.checkHash(result[0][0].UserPassword,password).then(function(res){
-            if(!res){
-              return done(null, false, { message: 'Incorrect password.' })
-            }
-            //normalize result to username,password and id
-            return done(null, {username:result[0][0].UserEmail,password:result[0][0].UserPassword,id:result[0][0].UserID,userVerified:result[0][0].UserEmailVerified})
-          }).catch(function(err){
-            return done(null,false,{message:'Hash error.'})
-          })
+          //normalize result to username,password and id
+          return done(null, {username:result[0][0].UserEmail,password:result[0][0].UserPassword,id:result[0][0].UserID,userVerified:result[0][0].UserEmailVerified})
+        }).catch(function(err){
+          return done(null,false,{message:'Hash error.'})
         })
       }).catch(function(err){
         return done(err)
@@ -45,19 +43,17 @@ module.exports.init = function(apiPassport,adminPassport){
   ));
   adminPassport.use('local',new LocalStrategy(
     function(username, password, done) {
-      db.getConn().then(function(conn){
-        conn.query('SELECT AdminUsername, AdminPassword, AdminID,AdminRoles FROM admins WHERE AdminUsername="'+username+'"').then(function(result){
-          if (result[0].length===0) {
-            return done(null, false, { message: 'Incorrect username.' })
+      db.pool.query('SELECT AdminUsername, AdminPassword, AdminID,AdminRoles FROM admins WHERE AdminUsername="'+username+'"').then(function(result){
+        if (result[0].length===0) {
+          return done(null, false, { message: 'Incorrect username.' })
+        }
+        hash.checkHash(result[0][0].AdminPassword,password).then(function(res){
+          if(!res){
+            return done(null, false, { message: 'Incorrect password.' })
           }
-          hash.checkHash(result[0][0].AdminPassword,password).then(function(res){
-            if(!res){
-              return done(null, false, { message: 'Incorrect password.' })
-            }
-            return done(null, {username:result[0][0].AdminUsername,password:result[0][0].AdminPassword,id:result[0][0].AdminID,roles:result[0][0].AdminRoles})
-          }).catch(function(err){
-            return done(null,false,{message:'Hash error.'})
-          })
+          return done(null, {username:result[0][0].AdminUsername,password:result[0][0].AdminPassword,id:result[0][0].AdminID,roles:result[0][0].AdminRoles})
+        }).catch(function(err){
+          return done(null,false,{message:'Hash error.'})
         })
       }).catch(function(err){
         return done(err)

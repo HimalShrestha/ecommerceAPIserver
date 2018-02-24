@@ -72,17 +72,12 @@ var Storage = multer.diskStorage({
 })
 //get the product
 router.get('/', function(req,res){
-  db.getConn().then(function(conn){
-    conn.query(`SELECT products.ProductID,products.ProductName,products.ProductPrice,products.ProductCartDesc,
+  db.pool.query(`SELECT products.ProductID,products.ProductName,products.ProductPrice,products.ProductCartDesc,
       products.ProductShortDesc,products.ProductLongDesc,products.ProductThumb,products.ProductImage,products.ProductRegisterDate,products.ProductStock,
       products.ProductLocation,products.ProductVisible,products.ProductUpdateDate,sellers.SellerID,sellers.SellerName,sellers.SellerDesc,sellers.SellerAccountName,
       productcategories.CategoryName FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
       INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID`).then(function(result){
         res.status(200).send(result[0])
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
   }).catch(function(err){
     console.log(err)
     res.send(err)
@@ -119,30 +114,23 @@ router.post('/',upload.fields([{ name: 'thumbnail', maxCount: 1 }, { name: 'prod
   let visible = product.visible===undefined?1:product.visible
   let productData = [product.name,product.price,product.cartDescription,product.shortDescription,
                       product.longDescription,req.files['thumbnail'][0].path,req.files['productImage'][0].path,product.stock,product.location,visible,product.categoryID,product.sellerID,admin]
-  db.getConn().then(function(conn){
-    console.log(productData)
-    conn.query(`INSERT INTO products (ProductName,ProductPrice,ProductCartDesc,ProductShortDesc,ProductLongDesc,ProductThumb,
+  db.pool.query(`INSERT INTO products (ProductName,ProductPrice,ProductCartDesc,ProductShortDesc,ProductLongDesc,ProductThumb,
       ProductImage,ProductStock,ProductLocation,ProductVisible,ProductCategoryID,ProductSellerID,ProductAdminID)
       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,productData).then(function(result){
       console.log(result[0]);
       res.status(200).json({message:'product.added',code:'Success'})
-    }).catch(function(err){
-      console.log(err);
-      res.send(err);
-    })
   }).catch(function(err){
     console.log(err);
     res.send(err);
   })
-});
+})
 
 
 //delete the product
 router.delete('/:id',function(req,res){
   let id = req.params.id
-  db.getConn().then(function(conn){
-    conn.query('SELECT ProductThumb,ProductImage FROM products WHERE ProductID = ?',[id]).then(function(image){
-      conn.query('DELETE FROM products WHERE ProductID = ?',[id]).then(function(result){
+  db.pool.query('SELECT ProductThumb,ProductImage FROM products WHERE ProductID = ?',[id]).then(function(image){
+      db.pool.query('DELETE FROM products WHERE ProductID = ?',[id]).then(function(result){
         if(result[0].affectedRows===0){
           res.status(422).json({message:'product.no.exist',code:'Failed'})
         }
@@ -163,9 +151,6 @@ router.delete('/:id',function(req,res){
     }).catch(function(err){
       res.send(err)
     })
-  }).catch(function(err){
-    res.send(err)
-  })
 })
 
 //update the product
@@ -188,12 +173,11 @@ router.put('/:id',upload.fields([{ name: 'thumbnail', maxCount: 1 }, { name: 'pr
   let visible = product.visible===undefined?1:product.visible
   let productData = [product.name,product.price,product.cartDescription,product.shortDescription,
                       product.longDescription,product.stock,product.location,visible,product.categoryID,product.sellerID,admin,id]
-  db.getConn().then(function(conn){
-    conn.query('SELECT ProductThumb,ProductImage FROM products WHERE ProductID = ?',[id]).then(function(images){
+  db.pool.query('SELECT ProductThumb,ProductImage FROM products WHERE ProductID = ?',[id]).then(function(images){
       var thumb = '',image = ''
       if (req.files['thumbnail']) thumb=`,ProductThumb="`+req.files['thumbnail'][0].path+`"`
       if (req.files['productImage']) image=`,ProductImage="`+req.files['productImage'][0].path+`"`
-      conn.query(`UPDATE products SET ProductName=?,ProductPrice=?,ProductCartDesc=?,ProductShortDesc=?,ProductLongDesc=?,
+      db.pool.query(`UPDATE products SET ProductName=?,ProductPrice=?,ProductCartDesc=?,ProductShortDesc=?,ProductLongDesc=?,
         ProductStock=?,ProductLocation=?,ProductVisible=?,ProductCategoryID=?,
         ProductSellerID=?,ProductAdminID=? `+thumb+image+` WHERE ProductID = ?`,productData).then(function(result){
           console.log(result[0])
@@ -211,8 +195,6 @@ router.put('/:id',upload.fields([{ name: 'thumbnail', maxCount: 1 }, { name: 'pr
               if (err) throw err;
             })
           }
-
-
           res.status(200).json({message:'product.updated',code:'Success'})
         }
 
@@ -229,44 +211,30 @@ router.put('/:id',upload.fields([{ name: 'thumbnail', maxCount: 1 }, { name: 'pr
     }).catch(function(err){
       res.send(err)
     })
-
-  }).catch(function(err){
-    res.send(err)
-  })
 })
 
 //server the images
 router.get('/image/:id',function(req,res){
-  db.getConn().then(function(conn){
-    conn.query(`SELECT ProductImage FROM products WHERE ProductID=?`,[req.params.id]).then(function(result){
-        if(result[0].length>0){
-          res.status(200).sendFile(result[0][0].ProductImage,{root: __dirname + '../../../'})
-        }
-        else{
-          res.status(404).end()
-        }
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
+  db.pool.query(`SELECT ProductImage FROM products WHERE ProductID=?`,[req.params.id]).then(function(result){
+    if(result[0].length>0){
+      res.status(200).sendFile(result[0][0].ProductImage,{root: __dirname + '../../../'})
+    }
+    else{
+      res.status(404).end()
+    }
   }).catch(function(err){
     console.log(err)
     res.send(err)
   })
 })
 router.get('/thumbnail/:id',function(req,res){
-  db.getConn().then(function(conn){
-    conn.query(`SELECT ProductThumb FROM products WHERE ProductID=?`,[req.params.id]).then(function(result){
-        if(result[0].length>0){
-          res.status(200).sendFile(result[0][0].ProductThumb,{root: __dirname + '../../../'})
-        }
-        else{
-          res.status(404).end()
-        }
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
+  db.pool.query(`SELECT ProductThumb FROM products WHERE ProductID=?`,[req.params.id]).then(function(result){
+    if(result[0].length>0){
+      res.status(200).sendFile(result[0][0].ProductThumb,{root: __dirname + '../../../'})
+    }
+    else{
+      res.status(404).end()
+    }
   }).catch(function(err){
     console.log(err)
     res.send(err)
@@ -276,12 +244,8 @@ router.get('/thumbnail/:id',function(req,res){
 
 function findSellerID(id){
   return new Promise(function(resolve,reject){
-    db.getConn().then(function(conn){
-      conn.query('SELECT SellerID AS id FROM sellers WHERE SellerID=?',[id]).then(function(result){
-        resolve(result[0])
-      }).catch(function(err){
-        reject(err)
-      })
+    db.pool.query('SELECT SellerID AS id FROM sellers WHERE SellerID=?',[id]).then(function(result){
+      resolve(result[0])
     }).catch(function(err){
       reject(err)
     })
@@ -289,12 +253,8 @@ function findSellerID(id){
 }
 function findCategoryID(id){
   return new Promise(function(resolve,reject){
-    db.getConn().then(function(conn){
-      conn.query('SELECT CategoryID AS id FROM productcategories WHERE CategoryID=?',[id]).then(function(result){
-        resolve(result[0])
-      }).catch(function(err){
-        reject(err)
-      })
+    db.pool.query('SELECT CategoryID AS id FROM productcategories WHERE CategoryID=?',[id]).then(function(result){
+      resolve(result[0])
     }).catch(function(err){
       reject(err)
     })
@@ -305,13 +265,8 @@ function findCategoryID(id){
 
 //get the product
 router.get('/category', function(req,res){
-  db.getConn().then(function(conn){
-    conn.query(`SELECT * FROM productcategories`).then(function(result){
-        res.status(200).send(result[0])
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
+  db.pool.query(`SELECT * FROM productcategories`).then(function(result){
+    res.status(200).send(result[0])
   }).catch(function(err){
     console.log(err)
     res.send(err)
@@ -343,35 +298,25 @@ router.post('/category', [
   const productCategory = matchedData(req);
   //   //validate the data from post
   let categoryData = [productCategory.categoryName]
-  db.getConn().then(function(conn){
-    conn.query(`INSERT INTO productcategories (CategoryName) VALUES (?)`,categoryData).then(function(result){
-      console.log(result[0]);
-      res.status(200).json({message:'category.added',code:'Success'})
-    }).catch(function(err){
-      console.log(err);
-      res.send(err);
-    })
+  db.pool.query(`INSERT INTO productcategories (CategoryName) VALUES (?)`,categoryData).then(function(result){
+    console.log(result[0]);
+    res.status(200).json({message:'category.added',code:'Success'})
   }).catch(function(err){
     console.log(err);
     res.send(err);
   })
-});
+})
 
 //delete the product
 router.delete('/category/:id',function(req,res){
   let id = req.params.id
-  db.getConn().then(function(conn){
-    conn.query('DELETE FROM productcategories WHERE CategoryID = ?',[id]).then(function(result){
-      if(result[0].affectedRows===0){
-        res.status(422).json({message:'category.no.exist',code:'Failed'})
-      }
-      else{
-        res.status(200).json({message:'category.deleted',code:'Success'})
-      }
-
-    }).catch(function(err){
-      res.send(err)
-    })
+  db.pool.query('DELETE FROM productcategories WHERE CategoryID = ?',[id]).then(function(result){
+    if(result[0].affectedRows===0){
+      res.status(422).json({message:'category.no.exist',code:'Failed'})
+    }
+    else{
+      res.status(200).json({message:'category.deleted',code:'Success'})
+    }
   }).catch(function(err){
     res.send(err)
   })
@@ -399,19 +344,14 @@ router.put('/category/:id',[
   const productCategory = matchedData(req);
   //   //validate the data from post
   let categoryData = [productCategory.categoryName,id]
-  db.getConn().then(function(conn){
-    conn.query(`UPDATE productcategories SET CategoryName=? WHERE CategoryID = ?`,categoryData).then(function(result){
-        console.log(result[0])
-      if(result[0].affectedRows===0){
-        res.status(422).json({message:'product.no.exist',code:'Failed'})
-      }
-      else{
-        res.status(200).json({message:'product.updated',code:'Success'})
-      }
-
-    }).catch(function(err){
-      res.send(err)
-    })
+  db.pool.query(`UPDATE productcategories SET CategoryName=? WHERE CategoryID = ?`,categoryData).then(function(result){
+    console.log(result[0])
+    if(result[0].affectedRows===0){
+      res.status(422).json({message:'product.no.exist',code:'Failed'})
+    }
+    else{
+      res.status(200).json({message:'product.updated',code:'Success'})
+    }
   }).catch(function(err){
     res.send(err)
   })
@@ -419,22 +359,17 @@ router.put('/category/:id',[
 
 //get the product
 router.get('/:id', function(req,res){
-  db.getConn().then(function(conn){
-    conn.query(`SELECT products.ProductID,products.ProductName,products.ProductPrice,products.ProductCartDesc,
+  db.pool.query(`SELECT products.ProductID,products.ProductName,products.ProductPrice,products.ProductCartDesc,
       products.ProductShortDesc,products.ProductLongDesc,products.ProductThumb,products.ProductImage,products.ProductRegisterDate,products.ProductStock,
       products.ProductLocation,products.ProductVisible,products.ProductUpdateDate,sellers.SellerID,sellers.SellerName,sellers.SellerDesc,sellers.SellerAccountName,
       productcategories.CategoryName FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
       INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID WHERE products.ProductID=?`,[req.params.id]).then(function(result){
-        if(result[0].length>0){
-          res.status(200).send(result[0][0])
-        }
-        else{
-          res.status(404).json({message:'product.no.exist',code:'Failed'})
-        }
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
+    if(result[0].length>0){
+      res.status(200).send(result[0][0])
+    }
+    else{
+      res.status(404).json({message:'product.no.exist',code:'Failed'})
+    }
   }).catch(function(err){
     console.log(err)
     res.send(err)
@@ -443,12 +378,8 @@ router.get('/:id', function(req,res){
 
 function findCategoryName(name){
   return new Promise(function(resolve,reject){
-    db.getConn().then(function(conn){
-      conn.query('SELECT CategoryName AS name FROM productcategories WHERE CategoryName=?',[name]).then(function(result){
-        resolve(result[0])
-      }).catch(function(err){
-        reject(err)
-      })
+    db.pool.query('SELECT CategoryName AS name FROM productcategories WHERE CategoryName=?',[name]).then(function(result){
+      resolve(result[0])
     }).catch(function(err){
       reject(err)
     })

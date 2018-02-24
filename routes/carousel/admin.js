@@ -38,13 +38,8 @@ var validate = [
 ]
 //get the seller
 router.get('/', function(req,res){
-  db.getConn().then(function(conn){
-    conn.query(`SELECT * FROM carousels`).then(function(result){
-        res.status(200).send(result[0])
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
+  db.pool.query(`SELECT * FROM carousels`).then(function(result){
+    res.status(200).send(result[0])
   }).catch(function(err){
     console.log(err)
     res.send(err)
@@ -52,18 +47,13 @@ router.get('/', function(req,res){
 })
 router.get('/:id', function(req,res){
   let id = req.params.id
-  db.getConn().then(function(conn){
-    conn.query(`SELECT * FROM carousels WHERE CarouselID=?`,[id]).then(function(result){
-      if(result[0].length>0){
-        res.status(200).send(result[0][0])
-      }
-      else{
-        res.status(422).json({message:'id.no.exist',code:'Failed'})
-      }
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
+  db.pool.query(`SELECT * FROM carousels WHERE CarouselID=?`,[id]).then(function(result){
+    if(result[0].length>0){
+      res.status(200).send(result[0][0])
+    }
+    else{
+      res.status(422).json({message:'id.no.exist',code:'Failed'})
+    }
   }).catch(function(err){
     console.log(err)
     res.send(err)
@@ -84,15 +74,10 @@ router.post('/',upload.single('image'),validate, (req, res, next) => {
   const carousel = matchedData(req);
 
   let carouselData = [req.file.path,carousel.imageDesc,carousel.status]
-  db.getConn().then(function(conn){
-    conn.query(`INSERT INTO carousels (CarouselImage,CarouselDesc,CarouselStatus)
-     VALUES (?,?,?)`,carouselData).then(function(result){
-      console.log(result[0]);
-      res.status(200).json({message:'image.added',code:'Success'})
-    }).catch(function(err){
-      console.log(err);
-      res.send(err);
-    })
+  db.pool.query(`INSERT INTO carousels (CarouselImage,CarouselDesc,CarouselStatus)
+   VALUES (?,?,?)`,carouselData).then(function(result){
+    console.log(result[0]);
+    res.status(200).json({message:'image.added',code:'Success'})
   }).catch(function(err){
     console.log(err);
     res.send(err);
@@ -102,22 +87,18 @@ router.post('/',upload.single('image'),validate, (req, res, next) => {
 //delete the seller
 router.delete('/:id',function(req,res){
   let id = req.params.id
-  db.getConn().then(function(conn){
-    conn.query('SELECT CarouselImage FROM carousels WHERE CarouselID = ?',[id]).then(function(image){
-      conn.query('DELETE FROM carousels WHERE CarouselID = ?',[id]).then(function(result){
-        if(result[0].affectedRows===0){
-          res.status(422).json({message:'image.no.exist',code:'Failed'})
-        }
-        else{
-          fs.unlink(image[0][0].CarouselImage,function (err) {
-            if (err) throw err;
-          })
-          res.status(200).json({message:'image.deleted',code:'Success'})
-        }
+  db.pool.query('SELECT CarouselImage FROM carousels WHERE CarouselID = ?',[id]).then(function(image){
+    db.pool.query('DELETE FROM carousels WHERE CarouselID = ?',[id]).then(function(result){
+      if(result[0].affectedRows===0){
+        res.status(422).json({message:'image.no.exist',code:'Failed'})
+      }
+      else{
+        fs.unlink(image[0][0].CarouselImage,function (err) {
+          if (err) throw err;
+        })
+        res.status(200).json({message:'image.deleted',code:'Success'})
+      }
 
-      }).catch(function(err){
-        res.send(err)
-      })
     }).catch(function(err){
       res.send(err)
     })
@@ -140,27 +121,22 @@ router.put('/:id',upload.single('image'),validate,(req, res, next) => {
   const carousel = matchedData(req);
   //   //validate the data from post
   let carouselData = [carousel.imageDesc,carousel.status,id]
-  db.getConn().then(function(conn){
-    conn.query('SELECT CarouselImage FROM carousels WHERE CarouselID = ?',[id]).then(function(images){
-      var image=''
-      if (req.file) image=`,CarouselImage="`+req.file.path+`"`
-      conn.query(`UPDATE carousels SET CarouselDesc=?,CarouselStatus=?`+image+` WHERE CarouselID = ?`,carouselData).then(function(result){
-          console.log(result[0])
-        if(result[0].affectedRows===0){
-          res.status(422).json({message:'id.no.exist',code:'Failed'})
+  db.pool.query('SELECT CarouselImage FROM carousels WHERE CarouselID = ?',[id]).then(function(images){
+    var image=''
+    if (req.file) image=`,CarouselImage="`+req.file.path+`"`
+    db.pool.query(`UPDATE carousels SET CarouselDesc=?,CarouselStatus=?`+image+` WHERE CarouselID = ?`,carouselData).then(function(result){
+        console.log(result[0])
+      if(result[0].affectedRows===0){
+        res.status(422).json({message:'id.no.exist',code:'Failed'})
+      }
+      else{
+        if (req.file){
+          fs.unlink(images[0][0].CarouselImage,function (err) {
+            if (err) throw err;
+          })
         }
-        else{
-          if (req.file){
-            fs.unlink(images[0][0].CarouselImage,function (err) {
-              if (err) throw err;
-            })
-          }
-          res.status(200).json({message:'image.updated',code:'Success'})
-        }
-
-      }).catch(function(err){
-        res.send(err)
-      })
+        res.status(200).json({message:'image.updated',code:'Success'})
+      }
     }).catch(function(err){
       res.send(err)
     })
@@ -171,18 +147,13 @@ router.put('/:id',upload.single('image'),validate,(req, res, next) => {
 
 router.get('/image/:id', function(req,res){
   let id = req.params.id
-  db.getConn().then(function(conn){
-    conn.query(`SELECT CarouselImage FROM carousels WHERE CarouselID=?`,[id]).then(function(result){
-      if(result[0].length>0){
-        res.status(200).sendFile(result[0][0].CarouselImage,{root: __dirname + '../../../'})
-      }
-      else{
-        res.end()
-      }
-    }).catch(function(err){
-      console.log(err)
-      res.send(err)
-    })
+  db.pool.query(`SELECT CarouselImage FROM carousels WHERE CarouselID=?`,[id]).then(function(result){
+    if(result[0].length>0){
+      res.status(200).sendFile(result[0][0].CarouselImage,{root: __dirname + '../../../'})
+    }
+    else{
+      res.end()
+    }
   }).catch(function(err){
     console.log(err)
     res.send(err)
