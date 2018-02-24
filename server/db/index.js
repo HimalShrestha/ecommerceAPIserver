@@ -33,3 +33,4 @@ exports.getConn= function(){
 exports.endPool = function(){
   return pool.end()
 }
+exports.pool=pool

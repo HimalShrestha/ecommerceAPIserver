@@ -40,7 +40,8 @@ appAdmin.use(session({
 app.use('/api*',session({
     store: new FileStore({
 			ttl: 60*60,//s
-			reapInterval:60*60//s
+			reapInterval:60*60,//s
+      path:'./sessions'//s
 	  }),
     name: 'sid',
 		resave: false,

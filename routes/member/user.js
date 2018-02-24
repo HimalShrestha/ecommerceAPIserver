@@ -8,10 +8,15 @@ const nodemailer = require('nodemailer')
 const uuidv4 = require('uuid/v4')
 
 let smtpTransport = nodemailer.createTransport({
-    service: "Gmail",
+    host: '202.166.206.3',
+    port: 465,
+    secure: true, // true for 465, false for other ports
     auth: {
-        user: "himalhs1@gmail.com",
-        pass: "Kiec1179"
+        user: "test.smtp@maza777.com",
+        pass: "Welcome1"
+    },
+    tls: {
+        rejectUnauthorized: false
     }
 })
 // router.post('/',function(req,res){
@@ -55,7 +60,7 @@ router.post('/register', [
     .custom(value => {
       return findUsername(value).then(user => {
         if(user.length!==0){
-          throw new Error('this username is already in use');
+          throw new Error('username.exists');
         }
         else{
           return user

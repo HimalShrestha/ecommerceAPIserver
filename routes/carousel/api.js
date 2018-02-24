@@ -3,41 +3,29 @@ const router = express.Router()
 const db = require('../../server/db')
 
 router.get('/', function(req,res){
-  db.getConn().then(function(conn){
-    conn.query(`SELECT * FROM carousels`).then(function(result){
-      if(result[0].length>0){
-        res.status(200).send(result[0])
-      }
-      else{
-        res.status(422).json({message:'id.no.exist',code:'Failed'})
-      }
-    }).catch(function(err){
+  db.pool.query(`SELECT * FROM carousels`,function(err,result){
+    if(err){
       console.log(err)
-      res.send(err)
-    })
-  }).catch(function(err){
-    console.log(err)
-    res.send(err)
+      return res.status(500).send(err)
+    }
+    res.status(200).send(result)
   })
 })
 
 router.get('/image/:id', function(req,res){
   let id = req.params.id
-  db.getConn().then(function(conn){
-    conn.query(`SELECT CarouselImage FROM carousels WHERE CarouselID=?`,[id]).then(function(result){
-      if(result[0].length>0){
-        res.status(200).sendFile(result[0][0].CarouselImage,{root: __dirname + '../../../'})
-      }
-      else{
-        res.end()
-      }
-    }).catch(function(err){
+  db.pool.query(`SELECT CarouselImage FROM carousels WHERE CarouselID=`+id,function(err,result){
+    console.log(result)
+    if(err){
       console.log(err)
-      res.send(err)
-    })
-  }).catch(function(err){
-    console.log(err)
-    res.send(err)
+      return res.status(500).send(err)
+    }
+    if(result.length>0){
+      res.status(200).sendFile(result[0].CarouselImage,{root: __dirname + '../../../'})
+    }
+    else{
+      res.end()
+    }
   })
 })
 
