@@ -1,4 +1,5 @@
 const express = require('express')
+const path = require('path')
 const router = express.Router()
 const db = require('../../server/db')
 
@@ -21,7 +22,8 @@ router.get('/image/:id', function(req,res){
       return res.status(500).send(err)
     }
     if(result.length>0){
-      res.status(200).sendFile(result[0].CarouselImage,{root: __dirname + '../../../'})
+      // res.status(200).sendFile(result[0].CarouselImage,{root: '/'})
+      res.status(200).sendFile(result[0].CarouselImage, { root: path.join(__dirname, '../../') })
     }
     else{
       res.end()

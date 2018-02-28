@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const path = require('path')
 const db = require('../../server/db')
 
 
@@ -49,7 +50,8 @@ router.get('/:id', function(req,res){
 router.get('/image/:id',function(req,res){
   db.pool.query(`SELECT ProductImage FROM products WHERE ProductID=?`,[req.params.id]).then(function(result){
     if(result[0].length>0){
-      res.status(200).sendFile(result[0][0].ProductImage,{root: __dirname + '../../../'})
+      // res.status(200).sendFile(result[0][0].ProductImage,{root: __dirname + '../../../'})
+      res.status(200).sendFile(result[0][0].ProductImage, { root: path.join(__dirname, '../../') })
     }
     else{
       res.status(404).end()
@@ -62,7 +64,8 @@ router.get('/image/:id',function(req,res){
 router.get('/thumbnail/:id',function(req,res){
   db.pool.query(`SELECT ProductThumb FROM products WHERE ProductID=?`,[req.params.id]).then(function(result){
     if(result[0].length>0){
-      res.status(200).sendFile(result[0][0].ProductThumb,{root: __dirname + '../../../'})
+      // res.status(200).sendFile(result[0][0].ProductThumb,{root: __dirname + '../../../'})
+      res.status(200).sendFile(result[0][0].ProductThumb, { root: path.join(__dirname, '../../') })
     }
     else{
       res.status(404).end()

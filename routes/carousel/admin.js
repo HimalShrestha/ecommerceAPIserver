@@ -149,7 +149,8 @@ router.get('/image/:id', function(req,res){
   let id = req.params.id
   db.pool.query(`SELECT CarouselImage FROM carousels WHERE CarouselID=?`,[id]).then(function(result){
     if(result[0].length>0){
-      res.status(200).sendFile(result[0][0].CarouselImage,{root: __dirname + '../../../'})
+      // res.status(200).sendFile(result[0][0].CarouselImage,{root: __dirname + '../../../'})
+      res.status(200).sendFile(result[0][0].CarouselImage, { root: path.join(__dirname, '../../') })
     }
     else{
       res.end()
