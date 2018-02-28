@@ -128,7 +128,7 @@ router.put('/update/:id', [
   check('city').exists().withMessage('is.required').trim().isLength({max:90,min:1}).withMessage('length not in limit'),
   check('state').exists().withMessage('is.required').trim().isLength({max:50,min:1}).withMessage('length not in limit'),
   check('zip').exists().withMessage('is.required').trim().isLength({max:12}).withMessage('length not in limit'),
-  check('phone').exists().withMessage('is.required').trim().isLength({max:20,min:1}).withMessage('length not in limit'),
+  check('phone').exists().withMessage('is.required').trim().isLength({max:20}).withMessage('length not in limit'),
   check('country').exists().withMessage('is.required').trim().isLength({max:20,min:1}).withMessage('length not in limit'),
   check('address').exists().withMessage('is.required').trim().isLength({max:100}).withMessage('length not in limit'),
   check('address2').exists().withMessage('is.required').trim().isLength({max:50}).withMessage('length not in limit')

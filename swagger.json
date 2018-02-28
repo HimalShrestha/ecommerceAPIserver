@@ -856,6 +856,30 @@
         }
       }
     },
+    "/api/v1/payment": {
+      "get": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "get all methods",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
     "/admin/payment": {
       "get": {
         "tags": [
