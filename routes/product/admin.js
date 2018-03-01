@@ -112,11 +112,16 @@ router.post('/',upload.fields([{ name: 'thumbnail', maxCount: 1 }, { name: 'prod
   //   //validate the data from post
   let admin = req.user.id
   let visible = product.visible===undefined?1:product.visible
+  var image_Base64Content = new Buffer(fs.readFileSync(req.files['productImage'][0].path)).toString("base64")
+  var image_ContentType = 'image/' + path.extname(req.files['productImage'][0].originalname).split('.').pop();
+  var thumb_Base64Content = new Buffer(fs.readFileSync(req.files['thumbnail'][0].path)).toString("base64")
+  var thumb_ContentType = 'image/' + path.extname(req.files['thumbnail'][0].originalname).split('.').pop();
   let productData = [product.name,product.price,product.cartDescription,product.shortDescription,
-                      product.longDescription,req.files['thumbnail'][0].path,req.files['productImage'][0].path,product.stock,product.location,visible,product.categoryID,product.sellerID,admin]
+                      product.longDescription,req.files['thumbnail'][0].path,req.files['productImage'][0].path,product.stock,product.location,visible,product.categoryID,product.sellerID
+                      ,admin,image_Base64Content,image_ContentType,thumb_Base64Content,thumb_ContentType]
   db.pool.query(`INSERT INTO products (ProductName,ProductPrice,ProductCartDesc,ProductShortDesc,ProductLongDesc,ProductThumb,
-      ProductImage,ProductStock,ProductLocation,ProductVisible,ProductCategoryID,ProductSellerID,ProductAdminID)
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,productData).then(function(result){
+      ProductImage,ProductStock,ProductLocation,ProductVisible,ProductCategoryID,ProductSellerID,ProductAdminID,ProductImageBlob,ProductImageFileType,ProductThumbBlob,ProductThumbFileType)
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,productData).then(function(result){
       console.log(result[0]);
       res.status(200).json({message:'product.added',code:'Success'})
   }).catch(function(err){
@@ -171,12 +176,16 @@ router.put('/:id',upload.fields([{ name: 'thumbnail', maxCount: 1 }, { name: 'pr
   const product = matchedData(req);
   let admin = req.user.id
   let visible = product.visible===undefined?1:product.visible
+  var image_Base64Content = new Buffer(fs.readFileSync(req.files['productImage'][0].path)).toString("base64")
+  var image_ContentType = 'image/' + path.extname(req.files['productImage'][0].originalname).split('.').pop();
+  var thumb_Base64Content = new Buffer(fs.readFileSync(req.files['thumbnail'][0].path)).toString("base64")
+  var thumb_ContentType = 'image/' + path.extname(req.files['thumbnail'][0].originalname).split('.').pop();
   let productData = [product.name,product.price,product.cartDescription,product.shortDescription,
                       product.longDescription,product.stock,product.location,visible,product.categoryID,product.sellerID,admin,id]
   db.pool.query('SELECT ProductThumb,ProductImage FROM products WHERE ProductID = ?',[id]).then(function(images){
       var thumb = '',image = ''
-      if (req.files['thumbnail']) thumb=`,ProductThumb="`+req.files['thumbnail'][0].path+`"`
-      if (req.files['productImage']) image=`,ProductImage="`+req.files['productImage'][0].path+`"`
+      if (req.files['thumbnail']) thumb=`,ProductThumb="`+req.files['thumbnail'][0].path+`",ProductThumbBlob="`+thumb_Base64Content+`",ProductThumbFileType="`+thumb_ContentType+`"`
+      if (req.files['productImage']) image=`,ProductImage="`+req.files['productImage'][0].path+`",ProductImageBlob="`+image_Base64Content+`",ProductImageFileType="`+image_ContentType+`"`
       db.pool.query(`UPDATE products SET ProductName=?,ProductPrice=?,ProductCartDesc=?,ProductShortDesc=?,ProductLongDesc=?,
         ProductStock=?,ProductLocation=?,ProductVisible=?,ProductCategoryID=?,
         ProductSellerID=?,ProductAdminID=? `+thumb+image+` WHERE ProductID = ?`,productData).then(function(result){
@@ -215,10 +224,13 @@ router.put('/:id',upload.fields([{ name: 'thumbnail', maxCount: 1 }, { name: 'pr
 
 //server the images
 router.get('/image/:id',function(req,res){
-  db.pool.query(`SELECT ProductImage FROM products WHERE ProductID=?`,[req.params.id]).then(function(result){
+  db.pool.query(`SELECT ProductImageBlob, ProductImageFileType FROM products WHERE ProductID=?`,[req.params.id]).then(function(result){
     if(result[0].length>0){
       // res.status(200).sendFile(result[0][0].ProductImage,{root: __dirname + '../../../'})
-      res.status(200).sendFile(result[0][0].ProductImage, { root: path.join(__dirname, '../../') })
+      // res.status(200).sendFile(result[0][0].ProductImage, { root: path.join(__dirname, '../../') })
+      var image = new Buffer(result[0][0].ProductImageBlob).toString('binary')
+      res.set('Content-Type',result[0][0].ProductImageFileType);
+      res.status(200).end(image,'base64')
     }
     else{
       res.status(404).end()
@@ -229,10 +241,13 @@ router.get('/image/:id',function(req,res){
   })
 })
 router.get('/thumbnail/:id',function(req,res){
-  db.pool.query(`SELECT ProductThumb FROM products WHERE ProductID=?`,[req.params.id]).then(function(result){
+  db.pool.query(`SELECT ProductThumbBlob, ProductThumbFileType FROM products WHERE ProductID=?`,[req.params.id]).then(function(result){
     if(result[0].length>0){
       // res.status(200).sendFile(result[0][0].ProductThumb,{root: __dirname + '../../../'})
-      res.status(200).sendFile(result[0][0].ProductThumb, { root: path.join(__dirname, '../../') })
+      // res.status(200).sendFile(result[0][0].ProductThumb, { root: path.join(__dirname, '../../') })
+      var image = new Buffer(result[0][0].ProductThumbBlob).toString('binary')
+      res.set('Content-Type',result[0][0].ProductThumbFileType);
+      res.status(200).end(image,'base64')
     }
     else{
       res.status(404).end()

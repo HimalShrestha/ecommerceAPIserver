@@ -38,7 +38,7 @@ var validate = [
 ]
 //get the seller
 router.get('/', function(req,res){
-  db.pool.query(`SELECT * FROM carousels`).then(function(result){
+  db.pool.query(`SELECT CarouselID,CarouselImage,CarouselDesc,CarouselStatus FROM carousels`).then(function(result){
     res.status(200).send(result[0])
   }).catch(function(err){
     console.log(err)
@@ -47,7 +47,7 @@ router.get('/', function(req,res){
 })
 router.get('/:id', function(req,res){
   let id = req.params.id
-  db.pool.query(`SELECT * FROM carousels WHERE CarouselID=?`,[id]).then(function(result){
+  db.pool.query(`SELECT CarouselID,CarouselImage,CarouselDesc,CarouselStatus FROM carousels WHERE CarouselID=?`,[id]).then(function(result){
     if(result[0].length>0){
       res.status(200).send(result[0][0])
     }
@@ -60,6 +60,14 @@ router.get('/:id', function(req,res){
   })
 })
 
+// function getBase64(file) {
+//   return new Promise((resolve, reject) => {
+//   const reader =
+//   reader.readAsDataURL(file);
+//   reader.onload = () => resolve(reader.result);
+//   reader.onerror = error => reject(error);
+// });
+// }
 
 //post the seller
 router.post('/',upload.single('image'),validate, (req, res, next) => {
@@ -72,10 +80,16 @@ router.post('/',upload.single('image'),validate, (req, res, next) => {
   }
   // matchedData returns only the subset of data validated by the middleware
   const carousel = matchedData(req);
-
-  let carouselData = [req.file.path,carousel.imageDesc,carousel.status]
-  db.pool.query(`INSERT INTO carousels (CarouselImage,CarouselDesc,CarouselStatus)
-   VALUES (?,?,?)`,carouselData).then(function(result){
+  //convert image to base64
+  // getBase64(req.file).then( data => {
+  //
+  var Base64Content = new Buffer(fs.readFileSync(req.file.path)).toString("base64")
+  var ContentType = 'image/' + path.extname(req.file.originalname).split('.').pop();
+    // })
+  //finsih convert
+  let carouselData = [req.file.path,carousel.imageDesc,carousel.status,Base64Content,ContentType]
+  db.pool.query(`INSERT INTO carousels (CarouselImage,CarouselDesc,CarouselStatus,CarouselBlob,CarouselFileType)
+   VALUES (?,?,?,?,?)`,carouselData).then(function(result){
     console.log(result[0]);
     res.status(200).json({message:'image.added',code:'Success'})
   }).catch(function(err){
@@ -119,11 +133,13 @@ router.put('/:id',upload.single('image'),validate,(req, res, next) => {
   }
   // matchedData returns only the subset of data validated by the middleware
   const carousel = matchedData(req);
+  var Base64Content = new Buffer(fs.readFileSync(req.file.path)).toString("base64")
+  var ContentType = 'image/' + path.extname(req.file.originalname).split('.').pop();
   //   //validate the data from post
   let carouselData = [carousel.imageDesc,carousel.status,id]
   db.pool.query('SELECT CarouselImage FROM carousels WHERE CarouselID = ?',[id]).then(function(images){
     var image=''
-    if (req.file) image=`,CarouselImage="`+req.file.path+`"`
+    if (req.file) image=`,CarouselImage="`+req.file.path+`",CarouselBlob="`+Base64Content+`",CarouselFileType="`+ContentType+`"`
     db.pool.query(`UPDATE carousels SET CarouselDesc=?,CarouselStatus=?`+image+` WHERE CarouselID = ?`,carouselData).then(function(result){
         console.log(result[0])
       if(result[0].affectedRows===0){
@@ -147,10 +163,13 @@ router.put('/:id',upload.single('image'),validate,(req, res, next) => {
 
 router.get('/image/:id', function(req,res){
   let id = req.params.id
-  db.pool.query(`SELECT CarouselImage FROM carousels WHERE CarouselID=?`,[id]).then(function(result){
+  db.pool.query(`SELECT CarouselBlob, CarouselFileType FROM carousels WHERE CarouselID=?`,[id]).then(function(result){
     if(result[0].length>0){
-      // res.status(200).sendFile(result[0][0].CarouselImage,{root: __dirname + '../../../'})
-      res.status(200).sendFile(result[0][0].CarouselImage, { root: path.join(__dirname, '../../') })
+
+      var image = new Buffer(result[0][0].CarouselBlob).toString('binary')
+      res.set('Content-Type',result[0][0].CarouselFileType);
+      res.status(200).end(image,'base64')
+      // res.status(200).sendFile(result[0][0].CarouselImage, { root: path.join(__dirname, '../../') })
     }
     else{
       res.end()
