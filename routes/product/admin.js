@@ -75,7 +75,7 @@ router.get('/', function(req,res){
   db.pool.query(`SELECT products.ProductID,products.ProductName,products.ProductPrice,products.ProductCartDesc,
       products.ProductShortDesc,products.ProductLongDesc,products.ProductThumb,products.ProductImage,products.ProductRegisterDate,products.ProductStock,
       products.ProductLocation,products.ProductVisible,products.ProductUpdateDate,sellers.SellerID,sellers.SellerName,sellers.SellerDesc,sellers.SellerAccountName,
-      productcategories.CategoryName FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
+      productcategories.CategoryName,productcategories.CategoryID FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
       INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID`).then(function(result){
         res.status(200).send(result[0])
   }).catch(function(err){
@@ -164,22 +164,30 @@ router.put('/:id',upload.fields([{ name: 'thumbnail', maxCount: 1 }, { name: 'pr
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     //hack to delete the just uploaded file
-    fs.unlink(req.files['thumbnail'][0].path,function (err) {
-      if (err) throw err;
-    })
-    fs.unlink(req.files['productImage'][0].path,function (err) {
-      if (err) throw err;
-    })
+    if(req.files['productImage']){
+      fs.unlink(req.files['productImage'][0].path,function (err) {
+        if (err) throw err;
+      })
+    }
+    if(req.files['thumbnail']){
+      fs.unlink(req.files['thumbnail'][0].path,function (err) {
+        if (err) throw err;
+      })
+    }
     return res.status(422).json({ errors: errors.mapped() });
   }
   // matchedData returns only the subset of data validated by the middleware
   const product = matchedData(req);
   let admin = req.user.id
   let visible = product.visible===undefined?1:product.visible
-  var image_Base64Content = new Buffer(fs.readFileSync(req.files['productImage'][0].path)).toString("base64")
-  var image_ContentType = 'image/' + path.extname(req.files['productImage'][0].originalname).split('.').pop();
-  var thumb_Base64Content = new Buffer(fs.readFileSync(req.files['thumbnail'][0].path)).toString("base64")
-  var thumb_ContentType = 'image/' + path.extname(req.files['thumbnail'][0].originalname).split('.').pop();
+  if(req.files['productImage']){
+    var image_Base64Content = new Buffer(fs.readFileSync(req.files['productImage'][0].path)).toString("base64")
+    var image_ContentType = 'image/' + path.extname(req.files['productImage'][0].originalname).split('.').pop()
+  }
+  if(req.files['thumbnail']){
+    var thumb_Base64Content = new Buffer(fs.readFileSync(req.files['thumbnail'][0].path)).toString("base64")
+    var thumb_ContentType = 'image/' + path.extname(req.files['thumbnail'][0].originalname).split('.').pop()
+  }
   let productData = [product.name,product.price,product.cartDescription,product.shortDescription,
                       product.longDescription,product.stock,product.location,visible,product.categoryID,product.sellerID,admin,id]
   db.pool.query('SELECT ProductThumb,ProductImage FROM products WHERE ProductID = ?',[id]).then(function(images){
@@ -282,7 +290,7 @@ function findCategoryID(id){
 
 //get the product
 router.get('/category', function(req,res){
-  db.pool.query(`SELECT * FROM productcategories`).then(function(result){
+  db.pool.query(`SELECT * FROM productcategories ORDER BY CategoryID DESC LIMIT 100`).then(function(result){
     res.status(200).send(result[0])
   }).catch(function(err){
     console.log(err)
@@ -379,7 +387,7 @@ router.get('/:id', function(req,res){
   db.pool.query(`SELECT products.ProductID,products.ProductName,products.ProductPrice,products.ProductCartDesc,
       products.ProductShortDesc,products.ProductLongDesc,products.ProductThumb,products.ProductImage,products.ProductRegisterDate,products.ProductStock,
       products.ProductLocation,products.ProductVisible,products.ProductUpdateDate,sellers.SellerID,sellers.SellerName,sellers.SellerDesc,sellers.SellerAccountName,
-      productcategories.CategoryName FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
+      productcategories.CategoryName,productcategories.CategoryID FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
       INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID WHERE products.ProductID=?`,[req.params.id]).then(function(result){
     if(result[0].length>0){
       res.status(200).send(result[0][0])

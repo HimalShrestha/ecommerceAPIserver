@@ -43,6 +43,10 @@
     {
       "name": "carousel",
       "description": "Maintain carousel"
+    },
+    {
+      "name": "message",
+      "description": "User messages"
     }
   ],
   "schemes": [
@@ -786,6 +790,40 @@
         ],
         "produces": [
           "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/admin/order/detail/{orderDetailId}": {
+      "get": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "order detail",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "orderDetailId",
+            "in": "path",
+            "description": "ID of order detail",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
         ],
         "responses": {
           "200": {
@@ -1588,6 +1626,14 @@
         "produces": [
           "application/json"
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "category",
+            "description": "id of category",
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -2139,9 +2185,150 @@
           }
         }
       }
+    },
+    "/admin/message": {
+      "get": {
+        "tags": [
+          "message"
+        ],
+        "summary": "get all message",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/admin/message/{messageId}": {
+      "get": {
+        "tags": [
+          "message"
+        ],
+        "summary": "user sent messages",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "description": "ID of message",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "message"
+        ],
+        "summary": "Deletes an message",
+        "description": "",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Pet not found"
+          }
+        }
+      }
+    },
+    "/api/v1/message": {
+      "post": {
+        "tags": [
+          "message"
+        ],
+        "summary": "post message",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "set message",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Message"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
     }
   },
   "definitions": {
+    "Message": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "user"
+        },
+        "email": {
+          "type": "string",
+          "example": "test@test.com"
+        },
+        "subject": {
+          "type": "string",
+          "example": "test"
+        },
+        "message": {
+          "type": "string",
+          "example": "long message"
+        }
+      }
+    },
     "Seller": {
       "type": "object",
       "properties": {

@@ -11,7 +11,7 @@ router.get('/', function(req,res){
     db.pool.query(`SELECT products.ProductID,products.ProductName,products.ProductPrice,products.ProductCartDesc,
         products.ProductShortDesc,products.ProductLongDesc,products.ProductThumb,products.ProductImage,products.ProductRegisterDate,products.ProductStock,
         products.ProductLocation,products.ProductVisible,products.ProductUpdateDate,sellers.SellerID,sellers.SellerName,sellers.SellerDesc,sellers.SellerAccountName,
-        productcategories.CategoryName FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
+        productcategories.CategoryName,productcategories.CategoryID FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
         INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID WHERE productCategories.CategoryID =`+category,function(err,result){
           if(err){
             console.log(err)
@@ -23,7 +23,7 @@ router.get('/', function(req,res){
     db.pool.query(`SELECT products.ProductID,products.ProductName,products.ProductPrice,products.ProductCartDesc,
       products.ProductShortDesc,products.ProductLongDesc,products.ProductThumb,products.ProductImage,products.ProductRegisterDate,products.ProductStock,
       products.ProductLocation,products.ProductVisible,products.ProductUpdateDate,sellers.SellerID,sellers.SellerName,sellers.SellerDesc,sellers.SellerAccountName,
-      productcategories.CategoryName FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
+      productcategories.CategoryName,productcategories.CategoryID FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
       INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID`,function(err,result){
         if(err){
           console.log(err)
@@ -49,7 +49,7 @@ router.get('/:id', function(req,res){
   db.pool.query(`SELECT products.ProductID,products.ProductName,products.ProductPrice,products.ProductCartDesc,
       products.ProductShortDesc,products.ProductLongDesc,products.ProductThumb,products.ProductImage,products.ProductRegisterDate,products.ProductStock,
       products.ProductLocation,products.ProductVisible,products.ProductUpdateDate,sellers.SellerID,sellers.SellerName,sellers.SellerDesc,sellers.SellerAccountName,
-      productcategories.CategoryName FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
+      productcategories.CategoryName,productcategories.CategoryID FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
       INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID WHERE products.ProductID=?`,[req.params.id]).then(function(result){
     if(result[0].length>0){
       res.status(200).send(result[0][0])

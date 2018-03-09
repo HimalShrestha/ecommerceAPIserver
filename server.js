@@ -58,13 +58,15 @@ appAdmin.use(flash())
 
 autho.init(apiPassport,adminPassport)
 app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
   next();
  });
  appAdmin.use(function(req, res, next) {
-   res.header("Access-Control-Allow-Origin", "*");
-   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+   res.header('Access-Control-Allow-Origin', '*');
+   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
    next();
   });
 
@@ -95,6 +97,8 @@ const orderApi = require('./routes/orders/api')
 const orderAdmin = require('./routes/orders/admin')
 const carouselApi = require('./routes/carousel/api')
 const carouselAdmin = require('./routes/carousel/admin')
+const messageApi = require('./routes/info/messageApi')
+const messageAdmin = require('./routes/info/messageAdmin')
 
 app.use('/api/v1/auth',api)
 appAdmin.use('/admin/auth',admin)
@@ -111,6 +115,8 @@ app.use('/api/v1/order',orderApi)
 appAdmin.use('/admin/order',orderAdmin)
 app.use('/api/v1/carousel',carouselApi)
 appAdmin.use('/admin/carousel',carouselAdmin)
+app.use('/api/v1/message',messageApi)
+appAdmin.use('/admin/message',messageAdmin)
 
 
 

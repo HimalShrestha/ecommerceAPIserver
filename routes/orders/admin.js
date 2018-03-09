@@ -40,9 +40,9 @@ var validate = [
 ]
 
 router.get('/', function(req,res){
-  db.pool.query(`SELECT orders.OrderID,orders.OrderUsername,orders.OrderShipAddress,orders.OrderShipAddress2,orders.OrderCity,orders.OrderState,
+  db.pool.query(`SELECT orders.OrderID,orders.OrderUsername,orders.OrderAmount,orders.OrderStatus,orders.OrderDate,orders.OrderPaymentID,orders.orderUpdateDate,orders.OrderShipAddress,orders.OrderShipAddress2,orders.OrderCity,orders.OrderState,
       orders.OrderZip,orders.OrderCountry,orders.OrderPhone,orders.OrderTax,orders.OrderEmail,paymentmethods.PaymentType,admins.AdminUsername
-      FROM orders INNER JOIN paymentmethods ON orders.OrderPaymentID = paymentmethods.PaymentID LEFT JOIN admins ON orders.OrderAdminID = admins.AdminID`).then(function(result){
+      FROM orders INNER JOIN paymentmethods ON orders.OrderPaymentID = paymentmethods.PaymentID LEFT JOIN admins ON orders.OrderAdminID = admins.AdminID ORDER BY orders.OrderDate DESC LIMIT 100`).then(function(result){
     console.log(result)
     res.status(200).send(result[0])
   }).catch(function(err){
@@ -52,8 +52,8 @@ router.get('/', function(req,res){
 })
 
 router.get('/detail', function(req,res){
-  db.pool.query(`SELECT orderdetails.DetailID,products.ProductName,products.ProductPrice,orders.OrderAmount,orders.OrderDate,(orders.OrderAmount*products.productPrice) AS TotalPrice
-      FROM orderdetails INNER JOIN products ON products.ProductID = orderdetails.DetailProductID INNER JOIN orders ON orders.OrderID = orderdetails.DetailOrderID`).then(function(result){
+  db.pool.query(`SELECT orderdetails.DetailID,products.ProductID,orders.OrderID,products.ProductName,products.ProductPrice,orders.OrderAmount,orders.OrderDate,(orders.OrderAmount*products.productPrice) AS TotalPrice
+      FROM orderdetails INNER JOIN products ON products.ProductID = orderdetails.DetailProductID INNER JOIN orders ON orders.OrderID = orderdetails.DetailOrderID ORDER BY orders.OrderDate DESC LIMIT 100`).then(function(result){
     console.log(result[0])
     res.status(200).send(result[0])
   }).catch(function(err){
@@ -62,8 +62,24 @@ router.get('/detail', function(req,res){
   })
 })
 
+router.get('/detail/:id', function(req,res){
+  var id = req.params.id
+  db.pool.query(`SELECT orderdetails.DetailID,products.ProductID,orders.OrderID,products.ProductName,products.ProductPrice,orders.OrderAmount,orders.OrderDate,(orders.OrderAmount*products.productPrice) AS TotalPrice
+      FROM orderdetails INNER JOIN products ON products.ProductID = orderdetails.DetailProductID INNER JOIN orders ON orders.OrderID = orderdetails.DetailOrderID WHERE orderdetails.DetailID = ?`,[id]).then(function(result){
+    console.log(result[0])
+    if(result[0].length > 0){
+      res.status(200).send(result[0][0])
+    }else{
+      res.status(404).json({message:'id.no.exist',code:'Failed'})
+    }
+  }).catch(function(err){
+    console.log(err)
+    res.send(err)
+  })
+})
+
 router.get('/:id', function(req,res){
-  db.pool.query(`SELECT orders.OrderID,orders.OrderUsername,orders.OrderShipAddress,orders.OrderShipAddress2,orders.OrderCity,orders.OrderState,
+  db.pool.query(`SELECT orders.OrderID,orders.OrderUsername,orders.OrderStatus,orders.OrderDate,orders.OrderPaymentID,orders.orderUpdateDate,orders.OrderAmount,orders.OrderShipAddress,orders.OrderShipAddress2,orders.OrderCity,orders.OrderState,
       orders.OrderZip,orders.OrderCountry,orders.OrderPhone,orders.OrderTax,orders.OrderEmail,paymentmethods.PaymentType,admins.AdminUsername
       FROM orders INNER JOIN paymentmethods ON orders.OrderPaymentID = paymentmethods.PaymentID LEFT JOIN admins ON orders.OrderAdminID = admins.AdminID WHERE orders.OrderID=?`,[req.params.id]).then(function(result){
     if(result[0].length > 0){
@@ -112,7 +128,19 @@ router.post('/', validate, (req, res, next) => {
     })
 })
 
-router.put('/:id', validate, (req, res, next) => {
+router.put('/:id', [
+  check('status').exists().withMessage('is.required').trim().isInt().withMessage('not.integer').isLength({max:2,min:1}).withMessage('length not in limit'),
+  check('amount').exists().withMessage('is.required').trim().isInt().withMessage('not.integer').isLength({max:20,min:1}).withMessage('length not in limit'),
+  check('shipAddress').exists().withMessage('is.required').trim().isLength({max:100,min:1}).withMessage('length not in limit'),
+  check('shipAddress2').exists().withMessage('is.required').trim().isLength({max:100}).withMessage('length not in limit'),
+  check('city').exists().withMessage('is.required').trim().isLength({max:50,min:1}).withMessage('length not in limit'),
+  check('state').exists().withMessage('is.required').trim().isLength({max:50,min:1}).withMessage('length not in limit'),
+  check('zip').exists().withMessage('is.required').trim().isLength({max:20}).withMessage('length not in limit'),
+  check('country').exists().withMessage('is.required').trim().isLength({max:50,min:1}).withMessage('length not in limit'),
+  check('phone').exists().withMessage('is.required').trim().isLength({max:20,min:1}).withMessage('length not in limit'),
+  check('tax').exists().withMessage('is.required').trim().isLength({min:1}).withMessage('cannot be empty'),
+  check('email').exists().withMessage('is.required').isEmail().withMessage('must be an email').trim().normalizeEmail().isLength({max:100,min:1}).withMessage('length not in limit')
+], (req, res, next) => {
   var id = req.params.id
   // Get the validation result whenever you want; see the Validation Result API for all options!
   const errors = validationResult(req);
@@ -125,9 +153,9 @@ router.put('/:id', validate, (req, res, next) => {
   console.log(order)
   //   //validate the data from post
   let admin = req.user.id
-  let orderData = [order.amount,order.shipAddress,order.shipAddress2,order.city,order.state,order.zip,order.country,order.phone,order.tax,order.email,order.status,order.paymentId,admin,id]
+  let orderData = [order.amount,order.shipAddress,order.shipAddress2,order.city,order.state,order.zip,order.country,order.phone,order.tax,order.email,order.status,admin,id]
   db.pool.query(`UPDATE orders SET OrderAmount=?,OrderShipAddress=?,OrderShipAddress2=?,OrderCity=?,OrderState=?,
-      OrderZip=?,OrderCountry=?,OrderPhone=?,OrderTax=?,OrderEmail=?,OrderStatus=?,OrderPaymentID=?,OrderAdminID=? WHERE OrderID=?`,orderData)
+      OrderZip=?,OrderCountry=?,OrderPhone=?,OrderTax=?,OrderEmail=?,OrderStatus=?,OrderAdminID=? WHERE OrderID=?`,orderData)
     .then(function(result){
     console.log(result[0]);
     if(result[0].affectedRows===0){

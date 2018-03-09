@@ -4,6 +4,9 @@ var passport = require('passport')
 var checkAuth = require('../../server/authenticate')
 
 router.post('/login/user',checkAuth.checkApi())
+// router.post('/login/user',function(req,res){
+//   console.log(req.body)
+// })
 
 
 
