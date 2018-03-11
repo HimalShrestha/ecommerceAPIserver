@@ -38,7 +38,7 @@ var validate = [
 ]
 //get the seller
 router.get('/', function(req,res){
-  db.pool.query(`SELECT CarouselID,CarouselImage,CarouselDesc,CarouselStatus FROM carousels`).then(function(result){
+  db.pool.query(`SELECT CarouselID,CarouselImage,CarouselDesc,CarouselStatus FROM carousels ORDER BY CarouselID DESC LIMIT 100`).then(function(result){
     res.status(200).send(result[0])
   }).catch(function(err){
     console.log(err)
@@ -71,9 +71,12 @@ router.get('/:id', function(req,res){
 
 //post the seller
 router.post('/',upload.single('image'),validate, (req, res, next) => {
+  if(!req.file){
+    return res.status(422).json({message:'must.have.image.field',code:'Failed'})
+  }
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    fs.unlink(req.files.path,function (err) {
+    fs.unlink(req.file.path,function (err) {
       if (err) throw err;
     })
     return res.status(422).json({ errors: errors.mapped() });
@@ -126,15 +129,19 @@ router.put('/:id',upload.single('image'),validate,(req, res, next) => {
   let id = req.params.id
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    fs.unlink(req.files.path,function (err) {
-      if (err) throw err;
-    })
+    if (req.file) {
+      fs.unlink(req.files.path,function (err) {
+        if (err) throw err;
+      })
+    }
     return res.status(422).json({ errors: errors.mapped() });
   }
   // matchedData returns only the subset of data validated by the middleware
   const carousel = matchedData(req);
-  var Base64Content = new Buffer(fs.readFileSync(req.file.path)).toString("base64")
-  var ContentType = 'image/' + path.extname(req.file.originalname).split('.').pop();
+  if (req.file) {
+    var Base64Content = new Buffer(fs.readFileSync(req.file.path)).toString("base64")
+    var ContentType = 'image/' + path.extname(req.file.originalname).split('.').pop();
+  }
   //   //validate the data from post
   let carouselData = [carousel.imageDesc,carousel.status,id]
   db.pool.query('SELECT CarouselImage FROM carousels WHERE CarouselID = ?',[id]).then(function(images){

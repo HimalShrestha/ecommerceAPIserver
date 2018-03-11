@@ -5,23 +5,25 @@ const { check, validationResult } = require('express-validator/check')
 const { matchedData, sanitize } = require('express-validator/filter')
 
 var validate = [
-  check('name').exists().withMessage('is.required').trim().isLength({max:45,min:1}).withMessage('length not in limit').custom(value => {
-    return findSellerName(value).then(name => {
-      if(name.length>0){
-        throw new Error('name.already.exists');
-      }
-      else{
-        return name
-      }
-    })
-  }),
+  //check name is disabled.
+  // check('name').exists().withMessage('is.required').trim().isLength({max:45,min:1}).withMessage('length not in limit').custom(value => {
+  //   return findSellerName(value).then(name => {
+  //     if(name.length>0){
+  //       throw new Error('name.already.exists');
+  //     }
+  //     else{
+  //       return name
+  //     }
+  //   })
+  // }),
+  check('name').exists().withMessage('is.required').trim().isLength({max:45,min:1}).withMessage('length not in limit'),
   check('sellerDescription').exists().withMessage('is.required').trim().isLength({max:100,min:1}).withMessage('length not in limit'),
   check('accountName').exists().withMessage('is.required').trim().isLength({max:45,min:1}).withMessage('length not in limit'),
   check('accountNumber').exists().withMessage('is.required').trim().isLength({max:45,min:1}).withMessage('length not in limit')
 ]
 //get the seller
 router.get('/', function(req,res){
-  db.pool.query(`SELECT * FROM sellers`).then(function(result){
+  db.pool.query(`SELECT * FROM sellers ORDER BY SellerID DESC LIMIT 100`).then(function(result){
     res.status(200).send(result[0])
   }).catch(function(err){
     console.log(err)

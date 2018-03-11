@@ -52,7 +52,7 @@ router.get('/', function(req,res){
 })
 
 router.get('/detail', function(req,res){
-  db.pool.query(`SELECT orderdetails.DetailID,products.ProductID,orders.OrderID,products.ProductName,products.ProductPrice,orders.OrderAmount,orders.OrderDate,(orders.OrderAmount*products.productPrice) AS TotalPrice
+  db.pool.query(`SELECT orderdetails.DetailID,products.ProductID,orders.OrderID,orders.OrderStatus,products.ProductName,products.ProductPrice,orders.OrderAmount,orders.OrderDate,(orders.OrderAmount*products.productPrice) AS TotalPrice
       FROM orderdetails INNER JOIN products ON products.ProductID = orderdetails.DetailProductID INNER JOIN orders ON orders.OrderID = orderdetails.DetailOrderID ORDER BY orders.OrderDate DESC LIMIT 100`).then(function(result){
     console.log(result[0])
     res.status(200).send(result[0])
@@ -64,7 +64,7 @@ router.get('/detail', function(req,res){
 
 router.get('/detail/:id', function(req,res){
   var id = req.params.id
-  db.pool.query(`SELECT orderdetails.DetailID,products.ProductID,orders.OrderID,products.ProductName,products.ProductPrice,orders.OrderAmount,orders.OrderDate,(orders.OrderAmount*products.productPrice) AS TotalPrice
+  db.pool.query(`SELECT orderdetails.DetailID,products.ProductID,orders.OrderID,orders.OrderStatus,products.ProductName,products.ProductPrice,orders.OrderAmount,orders.OrderDate,(orders.OrderAmount*products.productPrice) AS TotalPrice
       FROM orderdetails INNER JOIN products ON products.ProductID = orderdetails.DetailProductID INNER JOIN orders ON orders.OrderID = orderdetails.DetailOrderID WHERE orderdetails.DetailID = ?`,[id]).then(function(result){
     console.log(result[0])
     if(result[0].length > 0){
