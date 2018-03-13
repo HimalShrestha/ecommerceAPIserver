@@ -72,6 +72,7 @@ router.post('/register', [
   // console.log(user)
   //   //validate the data from post
   hash.encrypt(user.password).then(function(password){
+    user.roles = JSON.stringify(user.roles).slice(1, -1)
     let registerData = [user.email,user.username,user.roles,password,user.fname,user.lname]
     db.pool.query('INSERT INTO admins (AdminEmail,AdminUsername,AdminRoles,AdminPassword,AdminFirstName,AdminLastName) VALUES (?,?,?,?,?,?)',registerData).then(function(result){
       // console.log(result[0]);
@@ -87,7 +88,7 @@ router.post('/register', [
 });
 
 router.get('/admin', function(req,res){
-  db.pool.query(`SELECT AdminID,AdminEmail, AdminUsername,AdminRoles,AdminFirstName,AdminLastName,AdminRegistrationDate FROM admins`).then(function(result){
+  db.pool.query(`SELECT AdminID,AdminEmail, AdminUsername,AdminRoles,AdminFirstName,AdminLastName,AdminRegistrationDate FROM admins ORDER BY AdminID DESC LIMIT 100`).then(function(result){
     res.status(200).send(result[0])
   }).catch(function(err){
     console.log(err)
@@ -98,6 +99,11 @@ router.get('/admin', function(req,res){
 router.get('/admin/:id', function(req,res){
   db.pool.query(`SELECT AdminID, AdminEmail, AdminUsername,AdminRoles,AdminFirstName,AdminLastName,AdminRegistrationDate FROM admins WHERE AdminID=?`,[req.params.id]).then(function(result){
     if(result[0].length>0){
+      var temp = []
+      result[0][0].AdminRoles.split(',').forEach( (i)=> {
+        temp.push(i.slice(1, -1))
+      })
+      result[0][0].AdminRoles = temp
       res.status(200).send(result[0][0])
     }
     else{
@@ -128,6 +134,7 @@ router.put('/admin/:id',[
   // matchedData returns only the subset of data validated by the middleware
   const admin = matchedData(req);
   if(!admin.password){
+    admin.roles = JSON.stringify(admin.roles).slice(1, -1)
     let adminData = [admin.email,admin.roles,admin.fname,admin.lname,id]
     db.pool.query('UPDATE admins SET AdminEmail=?,AdminRoles=?,AdminFirstName=?,AdminLastName=? WHERE AdminID=?',adminData).then(function(result){
       // console.log(result[0]);
@@ -144,6 +151,7 @@ router.put('/admin/:id',[
   }
   else{
     hash.encrypt(admin.password).then(function(password){
+      admin.roles = JSON.stringify(admin.roles).slice(1, -1)
       let adminData = [admin.email,admin.roles,password,admin.fname,admin.lname,id]
       db.pool.query('UPDATE admins SET AdminEmail=?,AdminRoles=?,AdminPassword=?,AdminFirstName=?,AdminLastName=? WHERE AdminID=?',adminData).then(function(result){
           // console.log(result[0]);
@@ -184,7 +192,7 @@ router.delete('/admin/:id',function(req,res){
 
 router.get('/user',function(req,res){
   db.pool.query(`SELECT UserID,UserEmail,UserFirstName,UserLastName,UserEmailVerified,UserIP,UserPhone,UserCountry,
-      UserRole,UserStatus,UserSellerID FROM users`).then(function(result){
+      UserRole,UserStatus,UserSellerID FROM users ORDER BY UserID DESC LIMIT 100`).then(function(result){
       console.log(result)
       res.status(200).send(result[0])
   }).catch(function(err){
@@ -195,7 +203,7 @@ router.get('/user',function(req,res){
 
 router.get('/user/:id', function(req,res){
   db.pool.query(`SELECT UserID,UserEmail,UserFirstName,UserLastName,UserCity,UserState,UserZip,UserEmailVerified,UserIP,UserPhone,UserCountry,
-      UserAddress,UserAddress2,UserStatus,UserRole,UserSellerID FROM users WHERE UserID=?`,[req.params.id]).then(function(result){
+      UserAddress,UserAddress2,UserStatus,UserRole,UserSellerID,UserRegistrationDate FROM users WHERE UserID=?`,[req.params.id]).then(function(result){
     if(result[0].length>0){
       res.status(200).send(result[0][0])
     }
@@ -210,13 +218,13 @@ router.get('/user/:id', function(req,res){
 
 router.put('/user/:id',[
   check('password', 'must be at least 5 chars long and contain one number').optional().trim().isLength({ min: 5,max:30 }).matches(/\d/),
-  check('fname').exists().withMessage('is.required').trim().isLength({max:50,min:1}).withMessage('length not in limit'),
-  check('lname').exists().withMessage('is.required').trim().isLength({max:50,min:1}).withMessage('length not in limit'),
-  check('city').exists().withMessage('is.required').trim().isLength({max:90,min:1}).withMessage('length not in limit'),
-  check('state').exists().withMessage('is.required').trim().isLength({max:50,min:1}).withMessage('length not in limit'),
+  check('fname').exists().withMessage('is.required').trim().isLength({max:50}).withMessage('length not in limit'),
+  check('lname').exists().withMessage('is.required').trim().isLength({max:50}).withMessage('length not in limit'),
+  check('city').exists().withMessage('is.required').trim().isLength({max:90}).withMessage('length not in limit'),
+  check('state').exists().withMessage('is.required').trim().isLength({max:50}).withMessage('length not in limit'),
   check('zip').exists().withMessage('is.required').trim().isLength({max:12}).withMessage('length not in limit'),
-  check('phone').exists().withMessage('is.required').trim().isLength({max:20,min:1}).withMessage('length not in limit'),
-  check('country').exists().withMessage('is.required').trim().isLength({max:20,min:1}).withMessage('length not in limit'),
+  check('phone').exists().withMessage('is.required').trim().isLength({max:20}).withMessage('length not in limit'),
+  check('country').exists().withMessage('is.required').trim().isLength({max:20}).withMessage('length not in limit'),
   check('address').exists().withMessage('is.required').trim().isLength({max:100}).withMessage('length not in limit'),
   check('address2').exists().withMessage('is.required').trim().isLength({max:50}).withMessage('length not in limit'),
   check('status').exists().withMessage('is.required').trim().isInt().withMessage('must be integer').isLength({min:1,max:12}).withMessage('length not in limit'),

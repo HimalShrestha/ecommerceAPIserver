@@ -21,7 +21,7 @@ var validate = [
 //product category
 //get the method
 router.get('/', function(req,res){
-  db.pool.query(`SELECT * FROM paymentmethods`).then(function(result){
+  db.pool.query(`SELECT * FROM paymentmethods ORDER BY PaymentID DESC LIMIT 100`).then(function(result){
     res.status(200).send(result[0])
   }).catch(function(err){
     console.log(err)
