@@ -6,7 +6,7 @@ const db = require('../../server/db')
 function getCount() {
   return new Promise((resolve,reject)=>{
     db.pool.query(`SELECT COUNT(*) FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
-      INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID`,function(err,count){
+      INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID WHERE products.ProductVisible = 1 `,function(err,count){
         if(err){
           reject(err)
         }
@@ -35,7 +35,7 @@ router.get('/', function(req,res){
       INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID `
   if(req.query.category){
     var category = req.query.category
-    db.pool.query(sql + `WHERE productCategories.CategoryID =`+category+` LIMIT `+limit,function(err,result){
+    db.pool.query(sql + `WHERE products.ProductVisible = 1 AND productCategories.CategoryID =`+category+` LIMIT `+limit,function(err,result){
           if(err){
             console.log(err)
             return res.status(500).send(err)
@@ -54,7 +54,7 @@ router.get('/', function(req,res){
   //     })
   // }
   else if(req.query.low && req.query.high) {
-    db.pool.query(sql + 'WHERE products.ProductPrice >= '+req.query.low+' AND products.ProductPrice <= '+req.query.high+` LIMIT `+limit,function(err,result){
+    db.pool.query(sql + 'WHERE products.ProductVisible = 1 AND products.ProductPrice >= '+req.query.low+' AND products.ProductPrice <= '+req.query.high+` LIMIT `+limit,function(err,result){
         if(err){
           console.log(err)
           return res.status(500).send(err)
@@ -67,7 +67,7 @@ router.get('/', function(req,res){
       })
   }
   else{
-    db.pool.query(sql+` LIMIT `+limit,function(err,result){
+    db.pool.query(sql+` WHERE products.ProductVisible = 1 LIMIT `+limit,function(err,result){
         if(err){
           console.log(err)
           return res.status(500).send(err)
@@ -97,7 +97,7 @@ router.get('/:id', function(req,res){
       products.ProductShortDesc,products.ProductLongDesc,products.ProductThumb,products.ProductImage,products.ProductRegisterDate,products.ProductStock,
       products.ProductLocation,products.ProductVisible,products.ProductUpdateDate,sellers.SellerID,sellers.SellerName,sellers.SellerDesc,sellers.SellerAccountName,
       productcategories.CategoryName,productcategories.CategoryID FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
-      INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID WHERE products.ProductID=?`,[req.params.id]).then(function(result){
+      INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID WHERE products.ProductVisible = 1 AND products.ProductID=?`,[req.params.id]).then(function(result){
     if(result[0].length>0){
       res.status(200).send(result[0][0])
     }

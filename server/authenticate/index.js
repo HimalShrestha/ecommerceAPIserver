@@ -26,7 +26,7 @@ module.exports.init = function(apiPassport,adminPassport){
   apiPassport.use('local',new LocalStrategy(
     function(username, password, done) {
       console.log(username, password)
-      db.pool.query('SELECT UserEmail, UserPassword, UserID, UserEmailVerified FROM users WHERE UserEmail="'+username+'"').then(function(result){
+      db.pool.query('SELECT UserEmail, UserPassword, UserID, UserEmailVerified, UserStatus FROM users WHERE UserEmail="'+username+'"').then(function(result){
         if (result[0].length===0) {
           console.log('Incorrect username.')
           return done(null, false, { message: 'Incorrect username.' })
@@ -38,7 +38,7 @@ module.exports.init = function(apiPassport,adminPassport){
           }
           //normalize result to username,password and id
           console.log(result[0][0])
-          return done(null, {username:result[0][0].UserEmail,password:result[0][0].UserPassword,id:result[0][0].UserID,userVerified:result[0][0].UserEmailVerified})
+          return done(null, {username:result[0][0].UserEmail,password:result[0][0].UserPassword,id:result[0][0].UserID,userVerified:result[0][0].UserEmailVerified,status:result[0][0].UserStatus})
         }).catch(function(err){
           return done(null,false,{message:'Hash error.'})
         })
