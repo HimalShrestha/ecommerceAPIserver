@@ -51,7 +51,7 @@ var Storage = multer.diskStorage({
        }
      },
      filename: function(req, file, callback) {
-         callback(null, req.body.name + "_" + Date.now() + "_" + path.extname(file.originalname));
+         callback(null, file.originalname + "_" + Date.now() + "_" + path.extname(file.originalname));
      }
  });
 
@@ -76,7 +76,7 @@ router.get('/', function(req,res){
       products.ProductShortDesc,products.ProductLongDesc,products.ProductThumb,products.ProductImage,products.ProductRegisterDate,products.ProductStock,
       products.ProductLocation,products.ProductVisible,products.ProductUpdateDate,sellers.SellerID,sellers.SellerName,sellers.SellerDesc,sellers.SellerAccountName,
       productcategories.CategoryName,productcategories.CategoryID FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
-      INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID`).then(function(result){
+      INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID ORDER BY products.ProductID DESC LIMIT 100`).then(function(result){
         res.status(200).send(result[0])
   }).catch(function(err){
     console.log(err)

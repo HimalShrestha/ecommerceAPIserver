@@ -99,6 +99,8 @@ const carouselApi = require('./routes/carousel/api')
 const carouselAdmin = require('./routes/carousel/admin')
 const messageApi = require('./routes/info/messageApi')
 const messageAdmin = require('./routes/info/messageAdmin')
+const subscribeApi = require('./routes/info/subscribeApi')
+const subscribeAdmin = require('./routes/info/subscribeAdmin')
 
 app.use('/api/v1/auth',api)
 appAdmin.use('/admin/auth',admin)
@@ -117,6 +119,8 @@ app.use('/api/v1/carousel',carouselApi)
 appAdmin.use('/admin/carousel',carouselAdmin)
 app.use('/api/v1/message',messageApi)
 appAdmin.use('/admin/message',messageAdmin)
+app.use('/api/v1/subscribe',subscribeApi)
+appAdmin.use('/admin/subscribe',subscribeAdmin)
 
 
 
