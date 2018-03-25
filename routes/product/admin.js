@@ -72,12 +72,29 @@ var Storage = multer.diskStorage({
 })
 //get the product
 router.get('/', function(req,res){
+  var size = 20
+  var page = 0
+  if(req.query.size){
+    size=parseInt(req.query.size)
+  }
+  if(req.query.page){
+    if(req.query.page>0){
+      page=parseInt(req.query.page)-1
+    }
+  }
+  var limit = ' LIMIT ' +size+' OFFSET '+(size*page)
   db.pool.query(`SELECT products.ProductID,products.ProductName,products.ProductPrice,products.ProductCartDesc,
       products.ProductShortDesc,products.ProductLongDesc,products.ProductThumb,products.ProductImage,products.ProductRegisterDate,products.ProductStock,
       products.ProductLocation,products.ProductVisible,products.ProductUpdateDate,sellers.SellerID,sellers.SellerName,sellers.SellerDesc,sellers.SellerAccountName,
       productcategories.CategoryName,productcategories.CategoryID FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
-      INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID ORDER BY products.ProductID DESC LIMIT 100`).then(function(result){
-        res.status(200).send(result[0])
+      INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID ORDER BY products.ProductID DESC `+limit).then(function(result){
+    db.pool.query(`SELECT COUNT(*) FROM products INNER JOIN sellers ON products.ProductSellerID = sellers.SellerID
+    INNER JOIN productcategories ON products.ProductCategoryID = productcategories.CategoryID`).then(function(count){
+          res.status(200).send({data:result[0],count:count[0][0]['COUNT(*)']})
+        }).catch(function(err){
+          console.log(err)
+          res.send(err)
+        })
   }).catch(function(err){
     console.log(err)
     res.send(err)
@@ -290,8 +307,24 @@ function findCategoryID(id){
 
 //get the product
 router.get('/category', function(req,res){
-  db.pool.query(`SELECT * FROM productcategories ORDER BY CategoryID DESC LIMIT 100`).then(function(result){
-    res.status(200).send(result[0])
+  var size = 20
+  var page = 0
+  if(req.query.size){
+    size=parseInt(req.query.size)
+  }
+  if(req.query.page){
+    if(req.query.page>0){
+      page=parseInt(req.query.page)-1
+    }
+  }
+  var limit = ' LIMIT ' +size+' OFFSET '+(size*page)
+  db.pool.query(`SELECT * FROM productcategories ORDER BY CategoryID DESC `+limit).then(function(result){
+    db.pool.query(`SELECT COUNT(*) FROM productcategories`).then(function(count){
+          res.status(200).send({data:result[0],count:count[0][0]['COUNT(*)']})
+        }).catch(function(err){
+          console.log(err)
+          res.send(err)
+        })
   }).catch(function(err){
     console.log(err)
     res.send(err)

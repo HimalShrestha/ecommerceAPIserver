@@ -88,8 +88,25 @@ router.post('/register', [
 });
 
 router.get('/admin', function(req,res){
-  db.pool.query(`SELECT AdminID,AdminEmail, AdminUsername,AdminRoles,AdminFirstName,AdminLastName,AdminRegistrationDate FROM admins ORDER BY AdminID DESC LIMIT 100`).then(function(result){
-    res.status(200).send(result[0])
+  var size = 20
+  var page = 0
+  if(req.query.size){
+    size=parseInt(req.query.size)
+  }
+  if(req.query.page){
+    if(req.query.page>0){
+      page=parseInt(req.query.page)-1
+    }
+  }
+  var limit = ' LIMIT ' +size+' OFFSET '+(size*page)
+  db.pool.query(`SELECT AdminID,AdminEmail, AdminUsername,AdminRoles,AdminFirstName,AdminLastName,AdminRegistrationDate FROM admins ORDER BY AdminID DESC `+ limit).then(function(result){
+    db.pool.query(`SELECT COUNT(*) FROM admins`).then(function(count){
+      console.log(count)
+      res.status(200).send({data:result[0],count:count[0][0]['COUNT(*)']})
+    }).catch(function(err){
+      console.log(err)
+      res.send(err)
+    })
   }).catch(function(err){
     console.log(err)
     res.send(err)
@@ -191,10 +208,25 @@ router.delete('/admin/:id',function(req,res){
 //=============USERS=============
 
 router.get('/user',function(req,res){
+  var size = 20
+  var page = 0
+  if(req.query.size){
+    size=parseInt(req.query.size)
+  }
+  if(req.query.page){
+    if(req.query.page>0){
+      page=parseInt(req.query.page)-1
+    }
+  }
+  var limit = ' LIMIT ' +size+' OFFSET '+(size*page)
   db.pool.query(`SELECT UserID,UserEmail,UserFirstName,UserLastName,UserEmailVerified,UserIP,UserPhone,UserCountry,
-      UserRole,UserStatus,UserSellerID FROM users ORDER BY UserID DESC LIMIT 100`).then(function(result){
-      console.log(result)
-      res.status(200).send(result[0])
+      UserRole,UserStatus,UserSellerID FROM users ORDER BY UserID DESC `+limit).then(function(result){
+    db.pool.query(`SELECT COUNT(*) FROM users`).then(function(count){
+      res.status(200).send({data:result[0],count:count[0][0]['COUNT(*)']})
+    }).catch(function(err){
+      console.log(err)
+      res.send(err)
+    })
   }).catch(function(err){
     console.log(err)
     res.send(err)
