@@ -47,6 +47,10 @@
     {
       "name": "message",
       "description": "User messages"
+    },
+    {
+      "name": "subscribe",
+      "description": "Subscribers"
     }
   ],
   "schemes": [
@@ -253,6 +257,20 @@
         "produces": [
           "application/json"
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "size",
+            "description": "expected size of return data",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "page number should start at 1",
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -370,6 +388,20 @@
         ],
         "produces": [
           "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "size",
+            "description": "expected size of return data",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "page number should start at 1",
+            "required": false
+          }
         ],
         "responses": {
           "200": {
@@ -791,6 +823,20 @@
         "produces": [
           "application/json"
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "size",
+            "description": "expected size of return data",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "page number should start at 1",
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -932,6 +978,20 @@
         "produces": [
           "application/json"
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "size",
+            "description": "expected size of return data",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "page number should start at 1",
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -1063,6 +1123,20 @@
         ],
         "produces": [
           "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "size",
+            "description": "expected size of return data",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "page number should start at 1",
+            "required": false
+          }
         ],
         "responses": {
           "200": {
@@ -1494,6 +1568,20 @@
         "produces": [
           "application/json"
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "size",
+            "description": "expected size of return data",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "page number should start at 1",
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -1691,6 +1779,20 @@
         ],
         "produces": [
           "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "size",
+            "description": "expected size of return data",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "page number should start at 1",
+            "required": false
+          }
         ],
         "responses": {
           "200": {
@@ -1923,6 +2025,20 @@
         ],
         "produces": [
           "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "size",
+            "description": "expected size of return data",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "page number should start at 1",
+            "required": false
+          }
         ],
         "responses": {
           "200": {
@@ -2200,6 +2316,20 @@
         "produces": [
           "application/json"
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "size",
+            "description": "expected size of return data",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "page number should start at 1",
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -2305,9 +2435,91 @@
           }
         }
       }
+    },
+    "/admin/subscribe": {
+      "get": {
+        "tags": [
+          "subscribe"
+        ],
+        "summary": "get all subscribers",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "size",
+            "description": "expected size of return data",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "page number should start at 1",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
+    },
+    "/api/v1/subscribe": {
+      "post": {
+        "tags": [
+          "subscribe"
+        ],
+        "summary": "post email",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "set message",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Subscribe"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "422": {
+            "description": "Invalid"
+          }
+        }
+      }
     }
   },
   "definitions": {
+    "Subscribe":{
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "example": "test@test.com"
+        }
+      }
+    },
     "Message": {
       "type": "object",
       "properties": {
